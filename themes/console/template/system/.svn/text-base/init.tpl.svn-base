@@ -1,0 +1,42 @@
+<!--{include file="header.tpl"}-->
+<link rel="stylesheet" type="text/css" href="common/lib/ext/ux/css/MultiSelect.css"/>
+<script type="text/javascript" src="common/lib/ext/ux/MultiSelect.js"></script>
+<script type="text/javascript" src="common/lib/ext/ux/ItemSelector.js"></script>
+<script type="text/javascript" src="js/system/init.js"></script>
+<script type="text/javascript">
+var account = [<!--{$allaccount}-->];
+var salechannel = [<!--{$Sales_channels}-->];
+var depot = [<!--{$depot}-->];
+var info = eval(<!--{$info}-->);
+var shipping = [<!--{$shipping}-->];
+var orderstatus = [<!--{$orderstatus}-->];
+	var goods_status = [<!--{$goods_status}-->];
+	var goods_cat = [<!--{$goods_cat}-->];
+	var goods_brand = [<!--{$goods_brand}-->];
+	goods_cat.push(['0','所有分类']);
+	goods_brand.push(['0','所有品牌']);
+	goods_status.push(['0','All Status']);
+orderstatus.push(['0','所有状态']);
+account.push(['0','所有账户']);
+salechannel.push(['0','所有渠道']);
+Ext.onReady(function(){
+	Ext.QuickTips.init();
+    Ext.form.Field.prototype.msgTarget = 'side';
+	var systemForm = new Ext.ux.systemTab({
+		title:'系统初始化',
+		border:true,
+        autoWidth: true,
+		autoHeight:true,
+		handleURL:'index.php?model=system&action=inithandle',
+		arrdata:[goods_status,goods_cat,goods_brand],
+		accountdata:account,
+		info:info,
+		statusdata:orderstatus,
+		salesCnldata:salechannel,
+		depotdata:depot,
+		renderTo:document.body
+	});
+	loadend();
+});
+</script>
+<!--{include file="footer.tpl"}-->

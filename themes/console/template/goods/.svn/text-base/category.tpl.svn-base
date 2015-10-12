@@ -1,0 +1,63 @@
+<!--{include file="header.tpl"}-->
+    <style type="text/css">
+        body .x-panel {
+            margin:0 0 20px 10px;
+        }
+    </style>
+<script type="text/javascript" src="js/normalgrid.js"></script>
+<script type="text/javascript" src="js/goods/category.js"></script>
+    <script type="text/javascript">
+Ext.onReady(function() {
+	Ext.QuickTips.init();
+	Ext.form.Field.prototype.msgTarget = 'side';
+
+    var CategoryGrid = new Ext.ux.CategoryGrid({
+		id:'CategoryGrid',
+        title: '产品分类列表',
+		headers:['序号','分类代码','分类','运费','包装费','申报价值','报关名称','所属分类','parent_id','haschild','ali_cat_id'],
+        fields: ['cat_id','code','cat_name','shipping_fee','package_fee','Declared_value','dec_name','parent_name','parent_id','haschild','ali_cat_id'],
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=goods&action=catupdate',
+		delURL:'index.php?model=goods&action=catdel',
+		listURL:'index.php?model=goods&action=catList',
+		windowTitle:'产品分类',
+		windowWidth:300,
+		windowHeight:360,
+        renderTo: document.body
+    });
+	
+	var BrandGrid = new Ext.ux.NormalGrid({
+		id:'BrandGrid',
+        title: '产品品牌列表',
+		headers:['序号','品牌'],
+        fields: ['brand_id','brand_name'],
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=goods&action=brandupdate',
+		delURL:'index.php?model=goods&action=branddel',
+		listURL:'index.php?model=goods&action=brandList',
+		formitems:[{
+				xtype:'hidden',
+                name: 'brand_id'
+				},{
+				name:'brand_name',
+				fieldLabel:'品牌',
+				allowBlank:false,
+				blankText:'此项必填'
+				}],
+		windowTitle:'产品品牌',
+		windowWidth:300,
+		windowHeight:160,
+        renderTo: document.body
+	})
+	CategoryGrid.getStore().load({
+			params:{start:0,limit:CategoryGrid.pagesize}
+			});
+	BrandGrid.getStore().load({
+			params:{start:0,limit:BrandGrid.pagesize}
+			});
+	loadend();
+});
+    </script>
+<!--{include file="footer.tpl"}-->

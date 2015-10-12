@@ -1,0 +1,143 @@
+Ext.ux.depotmanagerView = Ext.extend(Ext.ux.OrderView, {
+	initComponent: function() {
+        Ext.ux.depotmanagerView.superclass.initComponent.call(this);
+    },
+	addcolumns:function(){
+		var ds = this.store;
+		this.columns.push({
+				  header:'操作',
+				  width:45,
+				  xtype: 'actioncolumn',
+				  items:[{
+						icon   : 'themes/default/images/update.gif',	 
+						tooltip: '编辑订单',
+						handler: function(grid, rowIndex, colIndex) {
+							var id = ds.getAt(rowIndex).get('order_id');
+							parent.openWindow(id,'编辑订单','index.php?model=order&action=edit&id='+id,1000,680);
+						}
+						 }]
+				  });
+	},
+	creatTbar:function(){
+		var store = this.store;
+		var pagesize = this.pagesize;
+		var step = this.step;
+		return new Ext.Toolbar({
+			items:['<b>订单列表</b>',
+				   '-','->',
+					'订单号:',{
+						xtype:'textfield',
+						id:'keyword',
+					    name:'keyword'
+					},'-',{
+						xtype:'button',
+						text:'搜索',
+						iconCls:'x-tbar-search',
+						handler:function(){
+							//console.log(store.getAt(0).get('order_id'))
+							store.load({params:{start:0, limit:pagesize,
+								keyword:Ext.fly('keyword').dom.value
+								}});
+							}
+					},'-',{
+						xtype:'button',
+						text:'高级搜索',
+						iconCls:'x-tbar-advsearch',
+						handler:this.showWindow.createDelegate(this)
+					},'-',{
+						xtype:'button',
+						text:'导出搜索',
+						iconCls:'x-tbar-import',
+						handler:function(){
+							var values = Ext.getCmp('searchform').getForm().getFieldValues();
+							if(values.totime) values.totime = values.totime.format('Y-m-d');
+							if(values.starttime) values.starttime = values.starttime.format('Y-m-d');
+							window.open().location.href = 'index.php?model=order&action=exportorder&keyword='+Ext.fly('keyword').dom.value+'&starttime='+values.starttime+'&totime='+values.totime+'&keytype='+values.keytype+'&shipping='+values.shipping+'&account='+values.account+'&status='+values.status+'&salechannel='+values.salechannel+'&key='+values.keywords+'&step='+step;
+							}
+					}
+				]			   				   
+		});	 
+	},
+	creatBbar: function() {
+		var	pagesize = this.pagesize;
+       return new Ext.PagingToolbar({
+		   	plugins: new Ext.ui.plugins.ComboPageSize(),
+			pageSize: pagesize,
+			displayInfo: true,
+			displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+			emptyMsg: "没有数据",
+            store: this.store,
+			items:['-',{
+					   text:'到货完成',
+					   pressed:true,
+					   handler:this.updatestatus.createDelegate(this,['1'])
+					   },'-',{
+					   text:'发送Message',
+					   pressed:true,
+					   handler:this.sendmessage.createDelegate(this,['0'])
+					   },'-',{
+					   text:'发送邮件',
+					   pressed:true,
+					   handler:this.sendmessage.createDelegate(this,['1'])
+					   },{
+					   text:'解除锁定',
+					   pressed:true,
+					   handler:this.unlockorders.createDelegate(this)
+					   }]				   
+        });
+    },
+	unlockorders:function(){
+		var ds = this.grid.getStore();
+		var ids = getIds(this.grid);
+		if(!ids) return false;
+							Ext.Msg.confirm('Unlock Alert!', '确定订单产品解锁库存锁定?', function(btn) {
+                				if (btn == 'yes') {
+									Ext.getBody().mask("正在进行解锁.请稍等...","x-mask-loading");
+									Ext.Ajax.request({
+									   url: 'index.php?model=order&action=unlockorder&ids='+ids,
+										success:function(response,opts){
+											var res = Ext.decode(response.responseText);
+											Ext.getBody().unmask();
+												if(res.success){
+												ds.reload();
+												Ext.example.msg('MSG',res.msg+'订单状态已被退回库管审核');
+												}else{
+												Ext.example.msg('ERROR',res.msg);
+												}						
+											}
+										});
+								}
+							},this);
+	},
+	updatetrack:function(){
+		var m = this.store.modified.slice(0);
+		if(m.length==0) return false;
+		var jsonArray = [];
+		Ext.each(m,function(item){
+			var moddata =new Object();
+			moddata.order_id = item.data.order_id;
+			moddata.track_no = item.data.track_no;
+			jsonArray.push(moddata);				
+			});
+		var thiz = this.store;
+		Ext.Ajax.request({
+					url:'index.php?model=order&action=updatetrackno',	 
+					method:'POST',
+					params:{'data':Ext.encode(jsonArray)},
+					success:function(response,opts){
+							var res = Ext.decode(response.responseText);
+							if(res.success){
+							Ext.Msg.alert('MSG',res.msg);
+							thiz.commitChanges();
+							}else{
+							Ext.Msg.alert('MSG',res.msg);
+							}
+						},
+					failure:function(){
+							Ext.example.msg('MSG','保存失败'),
+							thize.rejectChanges();
+						}
+				})	
+	}
+});
+

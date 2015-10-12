@@ -1,0 +1,66 @@
+Ext.ux.depotmanagerView = Ext.extend(Ext.ux.OrderView, {
+	initComponent: function() {
+        Ext.ux.depotmanagerView.superclass.initComponent.call(this);
+    },
+	addcolumns:function(){
+		var ds = this.store;
+		this.columns.push({
+				  header:'操作',
+				  width:45,
+				  xtype: 'actioncolumn',
+				  items:[{
+						icon   : 'themes/default/images/update.gif',	 
+						tooltip: '编辑订单',
+						handler: function(grid, rowIndex, colIndex) {
+							var id = ds.getAt(rowIndex).get('order_id');
+							parent.openWindow(id,'编辑订单','index.php?model=order&action=edit&id='+id,1000,680);
+						}
+						 }]
+				  });
+	},
+	creatBbar: function() {
+		var	pagesize = this.pagesize;
+       return new Ext.PagingToolbar({
+		   	plugins: new Ext.ui.plugins.ComboPageSize(),
+			pageSize: pagesize,
+			displayInfo: true,
+			displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+			emptyMsg: "没有数据",
+            store: this.store,
+			items:['-',{
+					   text:'标记缺货',
+					   pressed:true,
+					   handler:this.updatestatus.createDelegate(this,['0'])
+					   },'-',{
+					   text:'分仓出库',
+					   pressed:true,
+					   handler:this.completorder.createDelegate(this)
+					   }]				   
+        });
+    },
+	completorder:function(){
+		var ids = getIds(this.grid);
+		var thiz = this.store;
+		if(!ids) return false;
+		Ext.getBody().mask("Updating Data .waiting...","x-mask-loading");
+		Ext.Ajax.request({
+			url:'index.php?model=order&action=completeorder',
+					success:function(response){
+						var res = Ext.decode(response.responseText);
+						if(res.success){
+						Ext.example.msg('提示',res.msg);
+						thiz.reload();
+								}else{
+								Ext.Msg.alert('ERROR',res.msg);
+								}						
+						Ext.getBody().unmask();
+						},
+					failure:function(response){
+						Ext.example.msg('警告','订单流程审核失败');
+						Ext.getBody().unmask();
+						},
+			params:{id:ids}			 
+		});
+	}
+});
+

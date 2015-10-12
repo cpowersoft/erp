@@ -1,0 +1,73 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+Ext.onReady(function(){
+	var ds = new Ext.data.Store({
+		proxy : new Ext.data.HttpProxy({url:'index.php?model=dd&action=list&'}),
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            totalProperty: 'totalCount',
+            id: 'id'
+			},[
+			'id','dd_name','dd_caption'
+      	])
+    });
+    
+
+	var colModel = new Ext.grid.ColumnModel([
+		 {header:'ID',width:50,sortable:true,dataIndex:'id'},
+		 {id:'title',header:'标识', width:100,sortable:true,dataIndex:'dd_name'},
+		 {header:'名称',width:100,sortable:true,dataIndex:'dd_caption'}
+		 
+		]);
+	var tb = new Ext.Toolbar('north-div');//创建一个工具条
+	
+	tb.add({
+		text: '管理字典项',
+        handler: editDd
+		});
+		
+	var grid = new Ext.grid.GridPanel({
+				border:false,
+				region:'center',
+				loadMask: true,
+				el:'center',
+				title:'条目列表',
+				store: ds,
+				cm: colModel,
+				sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+				autoScroll: true,
+				bbar: new Ext.PagingToolbar({
+					pageSize: 20,
+					store: ds,
+					displayInfo: true,
+					displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+					emptyMsg: "没有数据"
+        		})
+            });
+	var viewport = new Ext.Viewport({
+        layout:'border',
+        items:[{
+			  border:false,
+			  region:'north',
+			  contentEl:'north-div',
+			  tbar:tb,
+			  height:26
+			},
+			grid
+		]}
+	);
+	ds.load({params:{start:0, limit:20, forumId: 4}});
+	function editDd() {
+		var id = getId(grid);
+		if (id) {
+			parent.openWindow('4000122','编辑字典项目','index.php?model=dd&action=editItem&id='+id,300,500);
+		} else {
+			Ext.example.msg('出错啦','你还没有选择要操作的记录！');
+		}
+	}
+	loadend();
+});
+</script>
+  <div id="north-div"></div>
+  <div id="center"></div>
+<!--{include file="footer.tpl"}-->

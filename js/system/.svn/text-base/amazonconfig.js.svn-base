@@ -1,0 +1,98 @@
+Ext.ux.AmazonGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.AmazonGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+		var data = this.arrdata;
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '账号',
+						dataIndex: 'account_id',
+						renderer:function(v){return comrender(v,data[0]);}
+					},{
+						header: 'Schedule类型',
+						dataIndex: 'ReportType',
+						renderer:function(v){return comrender(v,data[1]);}
+					},{
+						header: '时间周期',
+						dataIndex: 'Schedule',
+						renderer:function(v){return comrender(v,data[2]);}
+					}];
+        this.columns = cols;
+    },
+    createTbar: function() {
+        this.tbar = [{
+            text: '创建',
+            iconCls: 'x-tbar-add',
+            handler: this.createRecord.createDelegate(this)
+        }, {
+            text: '编辑',
+            iconCls: 'x-tbar-update',
+			ref: '../editBtn',
+			disabled:true,
+            handler: this.updateRecord.createDelegate(this)
+        }, {
+            text: '删除',
+            iconCls: 'x-tbar-del',
+			ref: '../removeBtn',
+			hidden:true,
+            handler: this.removeRecord.createDelegate(this)
+        }];
+    },
+	createFormtiems:function(){
+		var data = this.arrdata;
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+						xtype:'combo',
+						store: new Ext.data.SimpleStore({
+							 fields: ["id", "key_type"],
+							 data: data[0]
+						}),
+						valueField :"id",
+						displayField: "key_type",
+						mode: 'local',
+						editable: false,
+						forceSelection: true,
+						triggerAction: 'all',
+						hiddenName:'account_id',
+						fieldLabel: '账号',
+						name: 'account_id',
+						allowBlank:false
+					},{
+						xtype:'combo',
+						store: new Ext.data.SimpleStore({
+							 fields: ["id", "key_type"],
+							 data: data[1]
+						}),
+						valueField :"id",
+						displayField: "key_type",
+						mode: 'local',
+						editable: false,
+						forceSelection: true,
+						triggerAction: 'all',
+						hiddenName:'ReportType',
+						fieldLabel: 'Schedule类型',
+						name: 'ReportType',
+						allowBlank:false
+					},{
+						xtype:'combo',
+						store: new Ext.data.SimpleStore({
+							 fields: ["id", "key_type"],
+							 data: data[2]
+						}),
+						valueField :"id",
+						displayField: "key_type",
+						mode: 'local',
+						editable: false,
+						forceSelection: true,
+						triggerAction: 'all',
+						hiddenName:'Schedule',
+						fieldLabel: '时间周期',
+						name: 'Schedule',
+						allowBlank:false
+					}];	
+		this.formitem = items;
+	}
+});

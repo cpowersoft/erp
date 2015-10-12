@@ -1,0 +1,109 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+Ext.onReady(function(){
+    Ext.QuickTips.init();
+    Ext.form.Field.prototype.msgTarget = 'side';	
+    var top = new Ext.FormPanel({
+		id:'loadform',
+        buttonAlign:'center',
+        align:'center',
+		labelWidth:70,
+        frame:true,
+        title: '<!--{$title}-->发送',
+        bodyStyle:'padding:5px 5px 0',
+		style:'margin:10px',
+		width:300,
+        items: [{
+			name:'subject',
+			xtype:'textfield',
+			fieldLabel: '主题'
+			},{
+	        xtype:'combo',
+	        store: new Ext.data.SimpleStore({
+	             fields: ["id", "temp_name"],
+	             data: [<!--{$template}-->]
+	        }),
+	        valueField :"id",
+	        displayField: "temp_name",
+	        mode: 'local',
+	        editable: false,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        hiddenName:'id',
+	        fieldLabel: '模板',
+	        emptyText:'选择模板',
+			width:200,
+	        name: 'answer',
+			blankText:'请选择',
+						listeners: {
+							change:function(field,e){
+								Ext.getBody().mask("正在获取模板数据.请稍等...","x-mask-loading");
+								Ext.Ajax.request({
+								   url: 'index.php?model=template&action=getcontent&rec_id='+field.getValue()+'&order_id='+<!--{$order_id}-->,
+								   loadMask:true,
+									success:function(response,opts){
+										Ext.getBody().unmask();
+										Ext.getCmp('answer').setValue(response.responseText);
+										}
+									});									
+							}
+						}
+	        },{
+			xtype:'textarea',
+			fieldLabel: '回复内容',
+			width:200,
+			height:200,
+			id:'answer'
+			},{
+			xtype:'hidden',
+			id:'order_id',
+			value:<!--{$order_id}-->
+			},{
+			xtype:'hidden',
+			id:'type',
+			value:<!--{$type}-->
+			},{
+			xtype:'hidden',
+			id:'ids',
+			value:'<!--{$ids}-->'
+			}
+        ],
+
+        buttons: [{
+            text: '发送',
+			handler:function(){
+				if(top.form.isValid()){
+					Ext.getBody().mask("Updating Data .waiting...","x-mask-loading");
+								top.form.doAction('submit',{
+								   url: 'index.php?model=message&action=sendmessage',
+								 method:'post',
+								 timeout:600000,
+								 params:'',
+								   loadMask:true,
+									success:function(form,action){
+										Ext.getBody().unmask();
+											if(action.result.success){
+											Ext.example.msg('MSG',action.result.msg);
+											}else{
+											Ext.Msg.alert('ERROR',action.result.msg);
+											}						
+										},
+									 failure:function(form,action){
+										 Ext.getBody().unmask();
+										 Ext.Msg.alert('ERROR',action.result.msg);
+									 }
+									});									
+				}
+			}
+        },{
+        	text: '重置',
+			handler:function(){top.form.reset();}
+        }]
+    });
+	
+	
+	top.render(document.body);
+    loadend();
+});
+</script>
+<!--{include file="footer.tpl"}-->

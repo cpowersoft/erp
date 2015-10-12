@@ -1,0 +1,188 @@
+<!--{include file="header.tpl"}-->
+<link rel="stylesheet" type="text/css" href="js/grouping.css" />
+<link rel="stylesheet" type="text/css" href="js/statusbar/css/statusbar.css" />
+<script type="text/javascript" src="js/statusbar/StatusBar.js"></script>
+    <script type="text/javascript">
+Ext.onReady(function() {
+Ext.QuickTips.init();
+var account = [<!--{$account}-->];
+var shipping_id = [<!--{$shipping}-->];
+var msgWindow = showWindow('开始自动标记');
+var arr = object_Array(account);
+var shipping = object_Array(shipping_id);
+var t = new Ext.grid.GroupingView({
+            forceFit:true,
+            groupTextTpl: '{group}账号待标记订单数量: ({[values.rs.length]}个订单)'
+        });
+function showaccount(val){
+	return arr[val];
+}
+function showshipping(val){
+	return shipping[val];
+}
+var account_combo = new Ext.form.ComboBox({
+	            store: new Ext.data.SimpleStore({
+	                    fields: ["retrunValue", "displayText"],
+	                    data: account
+	                    }),
+	             valueField :"retrunValue",
+	              displayField: "displayText",
+	              mode: 'local',
+				  allowBlank:false,
+				  blankText:'不能为空',
+	              editable: false,
+	              forceSelection: true,
+	              triggerAction: 'all',
+	              hiddenName:'account',
+	              fieldLabel: '账户',
+	              emptyText:'选择',
+	              name: 'account',
+				  id:'account_combo'
+	});
+
+var sb = Ext.getCmp('basic-statusbar');
+        var store = new Ext.data.GroupingStore({
+		proxy : new Ext.data.HttpProxy({url:'index.php?model=order&action=waitmark'}),
+		autoLoad:true,
+		groupField:'Sales_account_id',
+		sortInfo:{field: 'order_id', direction: "ASC"},
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            id: 'order_id'
+			},['order_id','Sales_account_id','order_sn','shipping_id','userid','track_no'])
+    	});
+
+    var grid = new Ext.grid.GridPanel({
+        store: store,
+        columns: [
+            {header: "id", width: 60,hidden:true, sortable: true, dataIndex: 'order_id'},
+			{header: "账号",width: 60,hidden:true, dataIndex: 'Sales_account_id',renderer:showaccount},
+            {header: "订单号", width: 60, sortable: true, dataIndex: 'order_sn'},
+            {header: "Buyer", width: 60, sortable: true, dataIndex: 'userid'},
+			{header: "快递方式",width: 60,dataIndex: 'shipping_id',renderer:showshipping},
+            {header: "追踪单号", width: 60, sortable: true, dataIndex: 'track_no'}
+        ],
+        view: t,
+		tbar:[{
+				text:'选择账号'
+				},account_combo,{
+				xtype:'button',
+				text:'开始标记',
+				handler:function(){
+						startcheck();
+						}
+				}],
+		loadMask:true,
+        frame:true,
+        width: 400,
+        autoHeight: true,
+        title: 'Ebay待标记列表'
+    });
+	var store2 = new Ext.data.Store({
+		proxy : new Ext.data.HttpProxy({url:'index.php?model=order&action=amazonwaitmark'}),
+		autoLoad:true,
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            totalProperty: 'totalCount',
+            id: 'Sales_account_id'
+			},['Sales_account_id','account','num'])
+    	});
+	
+var grid2 = new Ext.grid.GridPanel({
+        store: store2,
+        columns: [
+            {header: "id", width: 60,hidden:true, dataIndex: 'Sales_account_id'},
+			{header: "账号",width: 100,dataIndex: 'account'},
+            {header: "待标记数量", width: 160, dataIndex: 'num'},
+            {
+				  header:'操作',
+				  width:65,
+				  xtype: 'actioncolumn',
+				  items:[{
+						icon   : 'themes/default/images/update.gif',	 
+						tooltip: '标记订单',
+						handler: function(grid, rowIndex, colIndex) {
+							var id = store2.getAt(rowIndex).get('Sales_account_id');
+							parent.openWindow(id,'标记Amazon订单','index.php?model=order&action=amazonmark&id='+id,1000,680);
+						}
+				  }]
+			}
+        ],
+		tbar:new Ext.Toolbar({
+			items:[
+				{
+						xtype:'button',
+						text:'刷新',
+						iconCls:'x-tbar-advsearch',
+						handler:function(){store2.reload();}
+				}
+			]}),
+		loadMask:true,
+        frame:true,
+        width: 400,
+        height: 450,
+        title: 'Amazon待标记列表(初次操作请联系我们确认没有历史未标记订单!!!)'
+    });	
+
+var tab = new Ext.TabPanel({
+    renderTo: Ext.getBody(),
+    activeTab: 0,
+     renderTo: document.body,
+    items: [grid,grid2]
+});
+
+function startcheck(){
+	var account_id = Ext.getCmp('account_combo').value;
+	if(!account_id == ''){
+		msgWindow.show();
+		sb.showBusy();
+		addText('开始标记'+arr[account_id]+'账号订单<br>');
+		midStart(0);
+	}
+}
+
+function midStart(num){
+	var account_id = Ext.getCmp('account_combo').value;
+		var records=store.queryBy(function(record,id){
+			return record.get("Sales_account_id") == account_id;
+		}).getRange();
+		if(records.length == 0){
+			addText('该账户没有需要标记的订单');
+		}
+		if(num<records.length){
+			var track_no = records[num].data.track_no;
+			var orderid = records[num].data.order_id;
+			var shipping_id = records[num].data.shipping_id;
+			ajaxHading(account_id,track_no,orderid,shipping_id,num);
+		}else{
+		sb.clearStatus();
+		sb.setText('标记完成');
+		store.reload();
+		}
+}
+function ajaxHading(account_id,track_no,orderid,shipping_id,num){
+			Ext.Ajax.request({
+					url:'index.php?model=order&action=ajaxmark',
+					timeout:600000,
+					success:function(response){
+							addText(response.responseText);
+							midStart(num+1);
+							},
+					failure:function(response){
+							addText(response.responseText);
+							sb.setStatus({
+							text: 'Oops!',
+							iconCls: 'x-status-error',
+							clear: true 
+							});
+							},
+					params:{account_id:account_id,track_no:track_no,orderid:orderid,shipping:shipping_id}
+					});
+}
+function addText(str){
+	msgWindow.body.dom.innerHTML = msgWindow.body.dom.innerHTML+str;
+}
+	loadend();
+});
+    </script>
+<!--{include file="footer.tpl"}-->

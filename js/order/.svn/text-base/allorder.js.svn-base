@@ -1,0 +1,282 @@
+Ext.ux.allorderView = Ext.extend(Ext.ux.OrderView, {
+	initComponent: function() {
+		this.getTab();
+		this.tab.getItem(5).setDisabled(false);
+		this.tab.getItem(7).setDisabled(false);
+        Ext.ux.allorderView.superclass.initComponent.call(this);
+    },
+	creatcolumns:function(){
+		var sm = this.sm;
+		var data = this.arrdata;
+		var cols = [sm];
+		for (var i = 0; i < this.headers.length; i++) {
+			if(this.headers[i] == 'order_status') cols.push({
+				   header:'状态',
+				   dataIndex : this.headers[i],
+				   sortable:true,
+				   width:85,
+				   renderer:function(v,x,rec){
+					   var str = comrender(v,data[0]);
+					   str += (rec.get('has_msg')>0)?'<img src="themes/default/images/feedbackme.gif">':'<img src="themes/default/images/feedbackme_off.gif">';
+					   if(rec.get('has_fbk') == 'Positive') str += '<img src="themes/default/images/drop-add.gif">';
+					   else if(rec.get('has_fbk') == 'Neutral') str += '<img src="themes/default/images/blue.gif">';
+					   else if(rec.get('has_fbk') == 'Negative') str += '<img src="themes/default/images/delete.gif">';
+					   else str += '<img src="themes/default/images/grey.gif">';
+					   str += (rec.get('has_rma')>0)?'<img src="themes/default/images/icons1/action_stop.gif">':'<img src="themes/default/images/shipped_gy.gif">';
+					  return str;
+					   }
+				   });
+			if(this.headers[i] == 'paid_time') cols.push({
+				   header:'PaidTime',
+				   width:80,
+				   sortable:true,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'order_sn') cols.push({
+				   header:'订单号',
+				   width:115,
+				   dataIndex : this.headers[i],
+				   renderer:function(val,x,rec){
+					   	var str = (rec.get('pay_note'))?'<img src="themes/default/images/comment.gif" title="'+rec.get('pay_note') + '">':'';
+					   	return '<b>'+val+'</b>' + str ;
+					   }
+				   });
+			if(this.headers[i] == 'paypalid') cols.push({
+				   header:'PaypalId',
+				   width:140,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'goods') cols.push({
+				   header:'产品',
+				   sortable:true,
+				   width:140,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'stock_place') cols.push({
+				   header:'货位',
+				   sortable:true,
+				   width:140,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'currency') cols.push({
+				   header:'币种',
+				   width:45,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'order_amount') cols.push({
+				   header:'总金额',
+				   sortable:true,
+				   width:65,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'shipping_id') cols.push({
+				   header:'物流',
+				   width:90,
+				   sortable:true,
+				   dataIndex : this.headers[i],
+				   renderer:function(v){ return comrender(v,data[1]);}
+				   });
+			if(this.headers[i] == 'userid') cols.push({
+				   header:'Buyerid',
+				   width:80,
+				   sortable:true,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'country') cols.push({
+				   header:'国家',
+				   width:100,
+				   sortable:true,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'Sales_channels') cols.push({
+				   header:'渠道',
+				   width:55,
+				   sortable:true,
+				   dataIndex : this.headers[i],
+				   renderer:function(v){ return comrender(v,data[2]);}
+				   });
+			if(this.headers[i] == 'Sales_account_id') cols.push({
+				   header:'账号',
+				   width:80,
+				   sortable:true,
+				   dataIndex : this.headers[i],
+				   renderer:function(v){ return comrender(v,data[3]);}
+				   });
+			if(this.headers[i] == 'track_no') cols.push({
+				   header:'追踪单号',
+				   width:75,
+				   sortable:true,
+				   dataIndex : this.headers[i],
+				   editor:new Ext.form.TextField()
+				   });
+			if(this.headers[i] == 'eubpdf') cols.push({
+				   header:'PDF',
+				   width:75,
+				   dataIndex : this.headers[i],
+				   renderer:function(v){ 
+				   		if(v != null && v != ''&& (v.substr(v.length-3,3) == 'pdf'||v.substr(v.length-3,3) == 'jpg') ) return '<a href='+v+' target=_blank>'+v+'</a>';
+						}
+					});
+			if(this.headers[i] == 'print_status') cols.push({
+				   header:'已打印',
+				   dataIndex : this.headers[i],
+				   width:50,
+				   renderer:function(v){return (v == 0)?'NO':'Yes';}
+				   });
+			if(this.headers[i] == 'sellsrecord') cols.push({
+				   header:'Salesrecord',
+				   width:60,
+				   sortable:true,
+				   dataIndex : this.headers[i]
+				   });
+			if(this.headers[i] == 'stockout_sn') cols.push({
+				   header:'出库单号',
+				   width:75,
+				   dataIndex : this.headers[i]
+				   });	   
+		}
+		this.columns = cols;
+	},
+	addcolumns:function(){
+		var ds = this.store;
+		this.columns.push({
+				   header:'发货时间',
+				   width:75,
+				   dataIndex : 'end_time'
+				   },{
+				  header:'操作',
+				  width:100,
+				  xtype: 'actioncolumn',
+				  items:[{
+						icon   : 'themes/default/images/update.gif',	 
+						tooltip: '编辑订单',
+						iconCls:'iconpadding',
+						handler: function(grid, rowIndex, colIndex) {
+							var id = ds.getAt(rowIndex).get('order_id');
+							parent.openWindow(id,'编辑订单','index.php?model=order&action=edit&id='+id,1000,680);
+						}
+						 },'-',{
+						icon   : 'themes/default/images/del.gif',	 
+						tooltip: '删除订单',
+						iconCls:'iconpadding',
+						handler: function(grid, rowIndex, colIndex) {
+							Ext.Msg.show({
+								title:'Delete order?',
+								msg:'Are you sure to delete this order?',
+								buttons:Ext.Msg.YESNO,
+								icon:Ext.MessageBox.ERROR,
+								fn:function(btn){
+									if (btn == 'yes') {
+										Ext.getBody().mask("正在删除订单.请稍等...","x-mask-loading");
+										var id = ds.getAt(rowIndex).get('order_id');
+									Ext.Ajax.request({
+									   url: 'index.php?model=order&action=delorder&id='+id,
+										success:function(response,opts){
+											var res = Ext.decode(response.responseText);
+											Ext.getBody().unmask();
+												if(res.success){
+												ds.reload();
+												Ext.example.msg('MSG',res.msg);
+												}else{
+												Ext.example.msg('ERROR',res.msg);
+												}						
+											}
+										});
+									}
+									}
+								});
+						}
+						},'-',{
+						icon   : 'themes/default/images/drop-add.gif',	 
+						tooltip: '复制订单',
+						iconCls:'iconpadding',
+						handler: function(grid, rowIndex, colIndex) {
+							var id = ds.getAt(rowIndex).get('order_id');
+							parent.openWindow(id,'新建订单','index.php?model=order&action=add&id='+id,1000,680);
+						}
+						 },'-',{
+						icon   : 'themes/default/images/comment.gif',	 
+						tooltip: 'paypal信息',
+						handler: function(grid, rowIndex, colIndex) {
+							var id = ds.getAt(rowIndex).get('order_id');
+							parent.openWindow(id,'paypal信息比对','index.php?model=order&action=readpaypal&id='+id,1000,680);
+						}
+						 }]
+				  });
+	},
+	creatBbar: function() {
+		var tempdata = this.arrdata[5];
+		var	pagesize = this.pagesize;
+		var thiz = this;
+       return new Ext.PagingToolbar({
+		   	plugins: new Ext.ui.plugins.ComboPageSize(),
+			pageSize: pagesize,
+			displayInfo: true,
+			displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+			emptyMsg: "没有数据",
+            store: this.store,
+			items:['-',{
+					   text:'发送Message',
+					   pressed:true,
+					   handler:this.sendmessage.createDelegate(this,['0'])
+					   },'-',{
+					   text:'发送邮件',
+					   pressed:true,
+					   handler:this.sendmessage.createDelegate(this,['1'])
+					   },'-',{
+					   text:'退款',
+					   pressed:true,
+					   handler:this.updatestatus.createDelegate(this,['2'])
+					   },'-',{
+							   	fieldLabel:'选择模板',
+								xtype:'combo',
+								mode:'local',
+								valueField: 'id',
+								width:100,
+								displayField:'template',
+								editable: false,		
+								triggerAction:'all',
+								store:new Ext.data.SimpleStore({
+									fields: ["id", "template"],
+									data: tempdata												   													   													}),
+								listeners:{
+									'change':function(){
+										thiz.orderprint(this.getValue());
+										}
+									}
+					   },'-',{
+					   text:'撤单入库',
+					   pressed:true,
+					   handler:this.revocation.createDelegate(this)
+					   }]		   
+        });
+    },
+	revocation:function(){
+		var s = this.grid.getSelectionModel().getSelections();
+		if (s.length > 1) {
+			Ext.example.msg('Error','请只选择一条记录进行撤单入库操作');return false;
+		}
+		var ids = getId(this.grid);
+		var thiz = this.store;
+		if(!ids) return false;
+		Ext.Msg.confirm('操作提示!', '确定进行撤单入库?', function(btn) {
+			if (btn == 'yes') {
+				Ext.getBody().mask("Updating Data .waiting...","x-mask-loading");
+				Ext.Ajax.request({
+					url:'index.php?model=stockin&action=revocation',
+							success:function(response){
+								Ext.example.msg('提示',response.responseText);
+								thiz.reload();
+								Ext.getBody().unmask();
+								},
+							failure:function(response){
+								Ext.example.msg('警告','撤单入库失败');
+								Ext.getBody().unmask();
+								},
+					params:{id:ids}			 
+				});
+                }
+            }, this);
+	}
+});
+

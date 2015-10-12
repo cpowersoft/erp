@@ -1,0 +1,284 @@
+Ext.ux.PrivilegeGrid = Ext.extend(Ext.grid.GridPanel, {
+    initComponent: function() {
+        this.autoHeight = true;
+        this.stripeRows = true;
+        this.viewConfig = {
+            forceFit: true
+        };
+		this.createTypeStore();
+        this.createStore();
+        this.createColumns();
+        this.createTbar();
+        this.createBbar();
+        Ext.ux.PrivilegeGrid.superclass.initComponent.call(this);
+    },
+    createStore: function() {
+        this.store = new Ext.data.Store({
+		proxy : new Ext.data.HttpProxy({url:'index.php?model=privilege&action=list'}),
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            totalProperty: 'totalCount',
+            id: 'id'
+			},this.fields)
+    	});
+    },
+
+    createTypeStore: function() {
+        this.typestore = new Ext.data.Store({
+		proxy : new Ext.data.HttpProxy({url:'index.php?model=privilege&action=typelist'}),
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            totalProperty: 'totalCount',
+            id: 'id'
+			},['id','action_type_name'])
+    	});
+		this.typestore.load();
+    },
+
+	
+	createColumns: function() {
+        var cols = [];
+		cols.push(new Ext.grid.RowNumberer());
+        for (var i = 1; i < this.fields.length -1; i++) {
+            var f = this.fields[i];
+			var h = this.headers[i];
+            cols.push({
+                header: h,
+                dataIndex: f
+            });
+        }
+        this.columns = cols;
+    },
+
+    createTbar: function() {
+        this.tbar = new Ext.Toolbar([{
+            text: '创建',
+            iconCls: 'x-tbar-add',
+            handler: this.createRecord.createDelegate(this)
+        }, {
+            text: '编辑',
+            iconCls: 'x-tbar-update',
+            handler: this.updateRecord.createDelegate(this)
+        }, {
+            text: '删除',
+            iconCls: 'x-tbar-del',
+            handler: this.removeRecord.createDelegate(this)
+        }, {
+            text: '分类',
+            iconCls: 'x-tbar-import',
+            handler: function(){parent.openWindow('privilegetype','权限分类','index.php?model=privilege&action=type',400,240);}
+        }]);
+    },
+
+    createBbar: function() {
+		var pagesize = this.pagesize;
+        this.bbar = new Ext.PagingToolbar({
+			pageSize: pagesize,
+			displayInfo: true,
+			displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+			emptyMsg: "没有数据",
+            store: this.store
+        });
+    },
+
+    createRecord: function() {
+        this.showWindow();
+        var form = this.getForm();
+        form.baseParams = {
+            create: true
+        };
+        form.setValues(this.getEmptyRecord());
+    },
+
+    updateRecord: function() {
+        var r = this.getSelectedRecord();
+        if (r != false) {
+            this.showWindow();
+            var form = this.getForm();
+            form.baseParams = {
+                create: false
+            };
+            form.loadRecord(r);
+        }
+    },
+
+    removeRecord: function() {
+        var r = this.getSelectedRecord();
+		var ids = getIds(this);
+        if (r != false) {
+            Ext.Msg.confirm('Info', 'Are you sure?', function(btn) {
+                if (btn == 'yes') {
+					Ext.Ajax.request({
+					   url: 'index.php?model=privilege&action=delete&ids='+ids,
+						success:function(response,opts){
+							var res = Ext.decode(response.responseText);
+								if(res.success){
+								Ext.example.msg('MSG',res.msg);
+								}else{
+								Ext.Msg.alert('MSG',res.msg);
+								}						
+							}
+						});
+                    this.getStore().remove(r);
+                }
+            }, this);
+
+        }
+    },
+
+    getSelectedRecord: function() {
+        var sm = this.getSelectionModel();
+        if (sm.getCount() == 0) {
+            Ext.example.msg('Info', 'Please select one row.');
+            return false;
+        } else {
+            return sm.getSelections()[0];
+        }
+    },
+
+    getEmptyRecord: function() {
+        var r = {};
+        for (var i = 0; i < this.fields.length; i++) {
+            var f = this.fields[i];
+            r[f] = '';
+        }
+        return r;
+    },
+
+    submitRecord: function() {
+        var form = this.getForm();
+        var values = form.getFieldValues();
+        /*if (form.baseParams.create) {
+            var data = [];
+            for (var name in values) {
+                data.push(values[name]);
+            }
+            this.store.loadData([data], true);
+        } else {
+            var r = this.getSelectedRecord();
+            r.beginEdit();
+            for (var name in values) {
+                r.set(name, values[name]);
+            }
+            r.endEdit();
+        }
+        */
+		var thiz = this.store;
+					if(form.isValid()){
+						form.doAction('submit',{
+							 url:'index.php?model=privilege&action=update',
+							 method:'post',
+							 params:'',
+							 success:function(form,action){
+							 		if (action.result.success) {
+										thiz.reload();
+										Ext.example.msg('MSG',action.result.msg);
+									} else {
+										Ext.Msg.alert('修改失败',action.result.msg);
+							 		}
+							 },
+							 failure:function(){
+									Ext.example.msg('操作','服务器出现错误请稍后再试！');
+							 }
+                      });
+					}
+		this.hideWindow();
+    },
+
+    getForm: function() {
+        return this.getFormPanel().getForm();
+    },
+
+    getFormPanel: function() {
+        if (!this.gridForm) {
+            this.gridForm = this.createForm();
+        }
+        return this.gridForm;
+    },
+
+    createForm: function() {
+        var items = [];
+		items.push({
+				xtype:'hidden',
+                name: this.fields[0]
+            });
+        for (var i = 1; i < this.fields.length-2; i++) {
+            var f = this.fields[i];
+			var h = this.headers[i];
+            items.push({
+                fieldLabel: h,
+                name: f
+            });
+        }
+		items.push({
+	                    xtype:'combo',
+	                    store: this.typestore,
+	                    valueField :"id",
+	                    displayField: "action_type_name",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'action_type',
+						allowBlank:false,
+	                    fieldLabel: '权限类别',
+	                    emptyText:'Choose One',
+	                    name: 'action_type'
+	                });
+		
+        var form = new Ext.form.FormPanel({
+            frame: true,
+            defaultType: 'textfield',
+            buttonAlign: 'center',
+            labelAlign: 'right',
+            labelWidth: 70,
+            trackResetOnLoad: true,
+            reader: new Ext.data.ArrayReader({
+                fields: this.fields
+            }),
+            items: items,
+            buttons: [{
+                text: 'submit',
+                handler: this.submitRecord.createDelegate(this)
+            }, {
+                text: 'reset',
+                handler: function() {
+                    form.getForm().reset();
+                }
+            }]
+        });
+        return form;
+    },
+
+    showWindow: function() {
+        this.getWindow().show();
+    },
+
+    hideWindow: function() {
+        this.getWindow().hide();
+    },
+
+    getWindow: function() {
+        if (!this.gridWindow) {
+            this.gridWindow = this.createWindow();
+        }
+        return this.gridWindow;
+    },
+
+    createWindow: function() {
+        var formPanel = this.getFormPanel();
+
+        var win = new Ext.Window({
+            title: 'Info',
+            closeAction: 'hide',
+			width:300,
+			height:180,
+            modal: true,
+            items: [
+                formPanel
+            ]
+        });
+
+        return win;
+    }
+});

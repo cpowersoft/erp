@@ -1,0 +1,377 @@
+Ext.ux.OutdepotGrid = Ext.extend(Ext.grid.GridPanel, {
+	initComponent: function() {
+        this.autoHeight = true;
+        this.stripeRows = true;
+        this.viewConfig = {
+            forceFit: true
+        };
+        this.createStore();
+        this.createColumns();
+        this.createTbar();
+		this.createBbar();
+        Ext.ux.OutdepotGrid.superclass.initComponent.call(this);
+    },
+    createStore: function() {
+        this.store = new Ext.data.Store({
+		proxy : new Ext.data.HttpProxy({url:this.listURL}),
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            totalProperty: 'totalCount',
+            id: this.fields[0]
+			},this.fields)
+    	});
+	},
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+					header: '产品图片',
+					dataIndex: 'goods_img',
+					width:50,
+					renderer:function(v){ return (v)?"<a href='"+v+"' target=_blank><img src='"+v+"' width=100></a>":'';}
+				},{
+						header: '产品编码',
+						width:50,
+						dataIndex: 'goods_sn'
+					},{
+						header: '产品名',
+						dataIndex: 'goods_name'
+					},{
+						header: '产品数量',
+						width:25,
+						dataIndex: 'out_qty'
+					},{
+						header: '已核数量',
+						width:25,
+						dataIndex: 'goods_qty',
+						renderer:function(val,x,rec){
+					   		return (rec.get('goods_qty') < rec.get('out_qty'))?'<b><font color=red>'+val+'</font></b>':val;
+							}
+					}];
+        this.columns = cols;
+    },
+	createTbar: function() {
+			var ds = this.store;
+			var plays = this.plays;
+			var thiz = this;
+			this.tbar = ['订单号或产品编码:',{
+						xtype:'textfield',
+						id:'key',
+						name:'key',
+						enableKeyEvents:true,
+						listeners:{
+							scope:this,
+							keypress:function(field,e){
+								var keyword = field.getValue();
+								if(e.getKey()==13 && keyword.length > 0){
+									keyword = keyword.replace(/#/,'%23');
+										Ext.Ajax.request({
+											   url: this.checkURL+'&key='+keyword+'&qty='+Ext.fly('qty').dom.value,
+											    success:function(response,opts){
+													var res = Ext.decode(response.responseText);
+														if(res.success){
+															if(res.type == 'order'){
+																Ext.fly('qty').setVisible(true);
+																Ext.fly('weight').setVisible(false);
+																Ext.fly('cost').setVisible(false);
+																Ext.fly('track').setVisible(false);
+																Ext.fly('dismsg').setVisible(false);
+																Ext.getCmp('weight').setValue('0');
+																Ext.getCmp('cost').setValue('0');
+																Ext.getCmp('track').setValue('');
+																Ext.getCmp('note').update(res.note);
+																thiz.setTitle('订单核对-----'+keyword);
+															}
+															if(res.type == 'complete'){
+																plays(1);
+																Ext.fly('qty').setVisible(false);
+																Ext.fly('weight').setVisible(true);
+																Ext.fly('cost').setVisible(true);
+																Ext.fly('track').setVisible(true);
+																Ext.fly('dismsg').setVisible(true);
+																Ext.getCmp('note').update('');
+															}
+															if(res.type == 'sncheck'){
+																thiz.showWindow();
+																Ext.getCmp('sn_hidden').setValue(res.key);
+																Ext.fly('sn').focus();
+															}
+																field.setValue('');
+																field.focus();
+																ds.load();
+														}else{
+															plays(0);
+															Ext.Msg.alert('ERROR',res.msg);
+															field.setValue('');
+															field.focus();
+														}						
+													}
+												});
+									}
+								if(e.getKey()==32){
+										Ext.Ajax.request({
+											   url: this.checkURL+'&complete=1'+'&track='+Ext.fly('track').dom.value+'&weight='+Ext.fly('weight').dom.value+'&cost='+Ext.fly('cost').dom.value,
+											    success:function(response,opts){
+													var res = Ext.decode(response.responseText);
+														if(res.success){
+															Ext.example.msg('OK','订单核对完成');
+																Ext.fly('qty').setVisible(false);
+																Ext.fly('track').setVisible(false);
+																Ext.fly('weight').setVisible(false);
+																Ext.fly('cost').setVisible(false);
+																field.setValue('');
+																Ext.getCmp('note').update('');
+																Ext.fly('track').dom.value='';
+																Ext.fly('weight').dom.value=0;
+																Ext.fly('cost').dom.value=0;
+																Ext.fly('dismsg').setVisible(false);
+																plays(1);
+																field.focus();
+																ds.load();
+														}else{
+															plays(0);
+															Ext.example.msg('ERROR',res.msg);
+															field.setValue('');
+															field.focus();
+														}						
+													}
+												});
+										}
+							}
+						}
+						 },'-','数量:',{
+						xtype:'textfield',
+						id:'qty',
+					    name:'qty',
+						width:40,
+						hidden:true,
+						hideMode:'visibility',
+						value:1,
+						enableKeyEvents:true,
+						listeners:{
+							scope:this,
+							keypress:function(field,e){
+									if(e.getKey()==13){
+										Ext.fly('key').focus();
+									}
+								}
+						}
+						},'-','重量:',{
+						xtype:'textfield',
+						id:'weight',
+					    name:'weight',
+						width:40,
+						hidden:true,
+						hideMode:'visibility',
+						value:0,
+						enableKeyEvents:true,
+						listeners:{
+							scope:this,
+							keypress:function(field,e){
+								if(e.getKey()==13){
+										Ext.Ajax.request({
+											   url: thiz.costURL+'&value='+field.getValue(),
+											    success:function(response,opts){
+													var res = Ext.decode(response.responseText);
+														if(res.success){
+															Ext.getCmp('cost').setValue(res.msg);
+														}else{
+															Ext.example.msg('ERROR',res.msg);
+														}						
+													}
+												});
+												Ext.fly('key').focus();
+								}
+								}
+						}
+						},'-','运费:',{
+						xtype:'textfield',
+						id:'cost',
+					    name:'cost',
+						width:40,
+						hidden:true,
+						hideMode:'visibility',
+						value:0,
+						enableKeyEvents:true,
+						listeners:{
+							scope:this,
+							keypress:function(field,e){
+									if(e.getKey()==13){
+										Ext.fly('key').focus();
+									}
+								}
+						}
+						},'-','追踪单号:',{
+						xtype:'textfield',
+						id:'track',
+					    name:'track',
+						width:100,
+						hidden:true,
+						hideMode:'visibility',
+						enableKeyEvents:true,
+						listeners:{
+							scope:this,
+							keypress:function(field,e){
+									if(e.getKey()==13){
+										Ext.fly('key').focus();
+									}
+								}
+						}
+						},'-',{
+						xtype:'displayfield',
+						id:'dismsg',
+						name:'dismsg',
+						hidden:true,
+						hideMode:'visibility',
+						html:'<font color=red>订单产品核对完成</font>'
+						},'-',new Ext.Toolbar({items:[{
+						xtype:'panel',
+						id:'note',
+						width:'100%',
+						html:''
+						}]})];
+	},
+    getGridPanel: function() {
+        if (!this.gridForm) {
+            this.gridForm = this.createGrid();
+        }
+        return this.gridForm;
+    },
+    createGrid: function() {
+		var thiz =this;
+		var store = new Ext.data.ArrayStore({
+        fields: [{name: 'sn'}]
+   		});
+		var grid = new Ext.grid.GridPanel({
+				border:false,
+				closable:true,
+				store: store,
+				height:450,
+				sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+				columns:[new Ext.grid.RowNumberer(),{header:'序列号',dataIndex:'SN'}],
+				autoScroll: true,
+				tbar:['序列号','-',{
+					xtype:'hidden',
+					id:'sn_hidden'
+					},{
+						xtype:'textfield',
+						id:'sn',
+						width:100,
+						enableKeyEvents:true,
+						listeners:{
+							scope:this,
+							keypress:function(field,e){
+									if(e.getKey()==13){
+										var value =field.getValue();
+										//添加record,删除record
+										var Item = Ext.data.Record.create([{name:'SN'}]);
+										var p = new Item({SN:value});
+										var index = store.findBy(function(record,id){
+												return record.get('SN') == value;									
+										});
+										if(index >= 0){Ext.example.msg('ERROR','该序列号已扫描');field.setValue('');return}
+										store.add(p);
+										field.setValue('');
+									}
+								}
+						}
+						},'-',{
+							text: '删除',
+							iconCls: 'x-tbar-del',
+							ref: '../removeBtn',
+							handler: this.removeRecord.createDelegate(this)
+						},'-',{
+							text: '提交',
+							iconCls: 'x-tbar-update',
+							ref: '../editBtn',
+							handler: this.updateRecord.createDelegate(this)
+						}]
+            });	
+        return grid;
+    },
+	updateRecord:function(){//保存序列号
+				var m = this.gridForm.getStore().modified.slice(0);
+				var store = this.gridForm.getStore();
+				var thiz = this;
+				var jsonArray = [];
+				store.each(function(record) {
+					jsonArray.push(record.data);	
+				});
+					if(jsonArray.length==0) {Ext.example.msg('ERROR','请输入序列号');return;}
+					Ext.getBody().mask("Updating Data .waiting...","x-mask-loading");
+					Ext.Ajax.request({
+					   url: 'index.php?model=order&action=collationsn',
+					   loadMask:true,
+					   params:{'data':Ext.encode(jsonArray),'goods_sn':Ext.getCmp('sn_hidden').getValue()},
+						success:function(response,opts){
+							var res = Ext.decode(response.responseText);
+							Ext.getBody().unmask();
+								if(res.success){
+								Ext.example.msg('MSG',res.msg);
+								if(res.type == 1){
+										Ext.fly('qty').setVisible(false);
+										Ext.fly('weight').setVisible(true);
+										Ext.fly('cost').setVisible(true);
+										Ext.fly('track').setVisible(true);
+										Ext.fly('dismsg').setVisible(true);
+										Ext.getCmp('note').update('');
+										}
+								thiz.store.load();
+								}else{
+								Ext.Msg.alert('ERROR',res.msg);
+								}
+								thiz.hideWindow();						
+							}
+						});
+			store.removeAll();
+	},
+	removeRecord:function(){
+		var data = this.gridForm.getSelectionModel().getSelected().data;
+		var index = this.gridForm.getStore().findBy(function(record,id){
+				return record.get('SN') == data.SN;									
+			});
+		this.gridForm.getStore().remove(this.gridForm.getStore().getAt(index));
+		return;
+	},
+    showWindow: function() {
+        this.getWindow().show();
+    },
+
+    hideWindow: function() {
+        this.getWindow().hide();
+    },
+
+    getWindow: function() {
+        if (!this.gridWindow) {
+            this.gridWindow = this.createWindow();
+        }
+        return this.gridWindow;
+    },
+
+    createWindow: function() {
+        var gridPanel = this.getGridPanel();
+        var win = new Ext.Window({
+			id:'searchwin',
+            title: 'Serial number',
+            closeAction: 'hide',
+			width:300,
+			height:500,
+            modal: true,
+            items: [
+                gridPanel
+            ]
+        });
+        return win;
+    },	
+	createBbar: function() {
+			this.bbar = new Ext.PagingToolbar({
+				pageSize: 15,
+				displayInfo: true,
+				displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+				emptyMsg: "没有数据",
+				store: this.store
+			});
+	},
+	plays:function(id)
+	{
+		(id == 1)?document.getElementById("sound1").play():document.getElementById("sound2").play();
+	}
+});

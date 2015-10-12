@@ -1,0 +1,512 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+Ext.onReady(function(){
+    Ext.QuickTips.init();
+    Ext.form.Field.prototype.msgTarget = 'side';
+
+    var top = new Ext.FormPanel({
+		id:'loadform',
+        buttonAlign:'center',
+        align:'center',
+		labelWidth:70,
+        frame:true,
+        title: 'Ebay订单加载',
+        bodyStyle:'padding:5px 5px 0',
+		style:'margin:10px',
+		width:300,
+        items: [{
+			xtype:'compositefield',
+			fieldLabel:'开始时间',
+			width:250,
+			items:[{
+	    	xtype:'datefield',
+	        id: 'start',
+	        allowBlank:false,
+			width:90,
+			value:'<!--{$yesterday}-->',//'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+			format:'Y-m-d'
+	        },{
+	    	xtype:'timefield',
+	        id: 'stime',
+			format:'G',
+			increment:60,
+			width:60,
+			value:'0',
+	        allowBlank:false
+	        }]
+			},{
+			xtype:'compositefield',
+			width:250,
+			fieldLabel:'结束时间',
+			items:[{
+	    	xtype:'datefield',
+	        id: 'end',
+	        allowBlank:false,
+			width:90,
+			value:'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+			format:'Y-m-d'
+	        },{
+	    	xtype:'timefield',
+	        id: 'etime',
+			format:'G',
+			increment:60,
+			width:60,
+			value:'23',
+	        allowBlank:false
+	        }]
+			},{
+	        xtype:'combo',
+	        store: new Ext.data.SimpleStore({
+	             fields: ["id", "account_name"],
+	             data: [<!--{$account}-->]
+	        }),
+	        valueField :"id",
+	        displayField: "account_name",
+	        mode: 'local',
+	        editable: false,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        hiddenName:'id',
+			width:150,
+	        fieldLabel: 'Ebay账号',
+	        emptyText:'选择Ebay账号',
+	        name: 'id',
+			allowBlank:false,
+			blankText:'请选择'
+	        }
+        ],
+
+        buttons: [{
+            text: '加载订单',
+			handler:function(){
+				if(top.form.isValid()){
+						//msgWindow.show();
+						var id = top.getForm().getFieldValues().id;
+						var starttime=Ext.util.Format.date(Ext.getCmp('start').getValue(),'Y-m-d');
+						var endtime = Ext.util.Format.date(Ext.getCmp('end').getValue(),'Y-m-d');
+						parent.newTab('ebayload','加载订单','index.php?model=order&action=load&id='+id+'&start='+starttime+'&end='+endtime+'&stime='+Ext.getCmp('stime').getValue()+'&etime='+Ext.getCmp('etime').getValue());
+
+				}
+			}
+        },{
+        	text: '重置',
+			handler:function(){top.form.reset();}
+        }]
+    });
+    var az = new Ext.FormPanel({
+		id:'azform',
+        buttonAlign:'center',
+        align:'center',
+		labelWidth:70,
+        frame:true,
+        title: 'Amazon订单加载',
+        bodyStyle:'padding:5px 5px 0',
+		style:'margin:10px',
+		width:300,
+        items: [{
+	    	xtype:'datefield',
+	        fieldLabel: '开始时间',
+	        name: 'start',
+	        allowBlank:false,
+			width:150,
+			format:'Y-m-d',
+			value:'<!--{$yesterday}-->',//'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	    	xtype:'datefield',
+	        fieldLabel: '结束时间',
+	        name: 'end',
+			format:'Y-m-d',
+	        allowBlank:false,
+			width:150,
+			value:'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	        xtype:'combo',
+	        store: new Ext.data.SimpleStore({
+	             fields: ["id", "account_name"],
+	             data: [<!--{$amazonaccount}-->]
+	        }),
+	        valueField :"id",
+	        displayField: "account_name",
+	        mode: 'local',
+	        editable: false,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        hiddenName:'id',
+			width:150,
+	        fieldLabel: 'amazon账号',
+	        emptyText:'选择Amazon账号',
+	        name: 'id',
+			allowBlank:false,
+			blankText:'请选择'
+	        }
+        ],
+
+        buttons: [{
+            text: '加载订单',
+			handler:function(){
+				if(az.form.isValid()){
+						//msgWindow.show();
+						var id = az.getForm().getFieldValues().id;
+						var starttime=Ext.util.Format.date(az.getForm().getFieldValues().start,'Y-m-d');
+						var endtime = Ext.util.Format.date(az.getForm().getFieldValues().end,'Y-m-d');
+						parent.newTab('azload','加载订单','index.php?model=order&action=loadaz&id='+id+'&start='+starttime+'&end='+endtime);
+
+				}
+			}
+        },{
+            text: '加载失败产品',
+			handler:function(){
+				if(az.form.isValid()){
+						//msgWindow.show();
+						var id = az.getForm().getFieldValues().id;
+						var starttime=Ext.util.Format.date(az.getForm().getFieldValues().start,'Y-m-d');
+						var endtime = Ext.util.Format.date(az.getForm().getFieldValues().end,'Y-m-d');
+						parent.newTab('azload','加载订单','index.php?model=order&action=loadazitem&id='+id+'&start='+starttime+'&end='+endtime);
+
+				}
+			}
+        },{
+        	text: '重置',
+			handler:function(){az.form.reset();}
+        }]
+    });
+    var zencart = new Ext.FormPanel({
+		id:'zcform',
+        buttonAlign:'center',
+        align:'center',
+		labelWidth:70,
+        frame:true,
+        title: 'zencart订单加载',
+        bodyStyle:'padding:5px 5px 0',
+		style:'margin:10px',
+		width:300,
+        items: [{
+	    	xtype:'datefield',
+	        fieldLabel: '开始时间',
+	        name: 'start',
+	        allowBlank:false,
+			width:150,
+			format:'Y-m-d',
+			value:'<!--{$yesterday}-->',//'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	    	xtype:'datefield',
+	        fieldLabel: '结束时间',
+	        name: 'end',
+			format:'Y-m-d',
+	        allowBlank:false,
+			width:150,
+			value:'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	        xtype:'combo',
+	        store: new Ext.data.SimpleStore({
+	             fields: ["id", "account_name"],
+	             data: [<!--{$zcaccount}-->]
+	        }),
+	        valueField :"id",
+	        displayField: "account_name",
+	        mode: 'local',
+	        editable: false,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        hiddenName:'id',
+			width:150,
+	        fieldLabel: 'zencart账号',
+	        emptyText:'选择zencart账号',
+	        name: 'id',
+			allowBlank:false,
+			blankText:'请选择'
+	        }
+        ],
+
+        buttons: [{
+            text: '加载订单',
+			handler:function(){
+				if(zencart.form.isValid()){
+						//msgWindow.show();
+						var id = zencart.getForm().getFieldValues().id;
+						var starttime=Ext.util.Format.date(zencart.getForm().getFieldValues().start,'Y-m-d');
+						var endtime = Ext.util.Format.date(zencart.getForm().getFieldValues().end,'Y-m-d');
+						parent.newTab('zcload','加载订单','index.php?model=order&action=loadzc&id='+id+'&start='+starttime+'&end='+endtime);
+
+				}
+			}
+        },{
+        	text: '重置',
+			handler:function(){zencart.form.reset();}
+        }]
+    });	
+    var tb = new Ext.FormPanel({
+		id:'tbform',
+        buttonAlign:'center',
+        align:'center',
+		labelWidth:70,
+        frame:true,
+        title: '淘宝订单加载',
+        bodyStyle:'padding:5px 5px 0',
+		style:'margin:10px',
+		width:300,
+        items: [{
+	    	xtype:'datefield',
+	        fieldLabel: '开始创建',
+	        name: 'start',
+	        allowBlank:false,
+			width:150,
+			format:'Y-m-d',
+			value:'<!--{$yesterday}-->',//'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	    	xtype:'datefield',
+	        fieldLabel: '结束创建',
+	        name: 'end',
+			format:'Y-m-d',
+	        allowBlank:false,
+			width:150,
+			value:'<!--{$yesterday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	        xtype:'combo',
+	        store: new Ext.data.SimpleStore({
+	             fields: ["id", "account_name"],
+	             data: [<!--{$tbaccount}-->]
+	        }),
+	        valueField :"id",
+	        displayField: "account_name",
+	        mode: 'local',
+	        editable: false,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        hiddenName:'id',
+			width:150,
+	        fieldLabel: '淘宝账号',
+	        emptyText:'选择淘宝账号',
+	        name: 'id',
+			allowBlank:false,
+			blankText:'请选择'
+	        }
+        ],
+
+        buttons: [{
+            text: '加载订单',
+			handler:function(){
+				if(tb.form.isValid()){
+						//msgWindow.show();
+						var id = tb.getForm().getFieldValues().id;
+						var starttime=Ext.util.Format.date(tb.getForm().getFieldValues().start,'Y-m-d');
+						var endtime = Ext.util.Format.date(tb.getForm().getFieldValues().end,'Y-m-d');
+						parent.newTab('ebayload','加载订单','index.php?model=order&action=loadtb&id='+id+'&start='+starttime+'&end='+endtime);
+
+				}
+			}
+        },{
+        	text: '重置',
+			handler:function(){top.form.reset();}
+        }]
+    });
+
+    var paypal = new Ext.FormPanel({
+        buttonAlign:'center',
+        align:'center',
+		labelWidth:70,
+        frame:true,
+        title: 'Paypal单据加载',
+        bodyStyle:'padding:5px 5px 0',
+		style:'margin:10px',
+		width:300,
+        items: [{
+	    	xtype:'datefield',
+	        fieldLabel: '开始时间',
+	        name: 'start',
+	        allowBlank:false,
+			width:150,
+			format:'Y-m-d',
+			value:'<!--{$dday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	    	xtype:'datefield',
+	        fieldLabel: '结束时间',
+	        name: 'end',
+			format:'Y-m-d',
+	        allowBlank:false,
+			width:150,
+			value:'<!--{$dday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	        xtype:'combo',
+	        store: new Ext.data.SimpleStore({
+	             fields: ["p_root_id", "paypal_account"],
+	             data: [<!--{$paccount}-->]
+	        }),
+	        valueField :"p_root_id",
+	        displayField: "paypal_account",
+	        mode: 'local',
+	        editable: false,
+			width:150,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        hiddenName:'p_root_id',
+	        fieldLabel: 'Paypal账号',
+	        emptyText:'选择Paypal账号',
+	        name: 'p_root_id',
+			allowBlank:false,
+			blankText:'请选择'
+	        }
+        ],
+
+        buttons: [{
+            text: '加载订单',
+			handler:function(){
+				if(paypal.form.isValid()){
+						//msgWindow.show();
+						var id = paypal.getForm().getFieldValues().p_root_id;
+						var starttime=Ext.util.Format.date(paypal.getForm().getFieldValues().start,'Y-m-d');
+						var endtime = Ext.util.Format.date(paypal.getForm().getFieldValues().end,'Y-m-d');
+						parent.newTab('paypalload','加载paypal款单','index.php?model=order&action=loadpaypal&id='+id+'&start='+starttime+'&end='+endtime);
+
+				}
+			}
+        },{
+        	text: '重置',
+			handler:function(){top.form.reset();}
+        }]
+    });	
+
+    var paypal1 = new Ext.FormPanel({
+        buttonAlign:'center',
+        align:'center',
+		labelWidth:70,
+        frame:true,
+        title: 'Paypal流水导出',
+        bodyStyle:'padding:5px 5px 0',
+		style:'margin:10px',
+		width:300,
+        items: [{
+	    	xtype:'datefield',
+	        fieldLabel: '开始时间',
+	        name: 'start',
+	        allowBlank:false,
+			width:150,
+			format:'Y-m-d',
+			value:'<!--{$dday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	    	xtype:'datefield',
+	        fieldLabel: '结束时间',
+	        name: 'end',
+			format:'Y-m-d',
+	        allowBlank:false,
+			width:150,
+			value:'<!--{$dday}-->',
+			maxValue:'<!--{$today}-->',
+	        anchor:'90%'
+	        },{
+	        xtype:'combo',
+	        store: new Ext.data.SimpleStore({
+	             fields: ["p_root_id", "paypal_account"],
+	             data: [<!--{$paccount}-->]
+	        }),
+	        valueField :"p_root_id",
+	        displayField: "paypal_account",
+	        mode: 'local',
+	        editable: false,
+	        forceSelection: true,
+	        triggerAction: 'all',
+			width:150,
+	        hiddenName:'p_root_id',
+	        fieldLabel: 'Paypal账号',
+	        emptyText:'选择Paypal账号',
+	        name: 'p_root_id',
+			allowBlank:false,
+			blankText:'请选择'
+	        }
+        ],
+
+        buttons: [{
+            text: '导出',
+			handler:function(){
+				if(paypal1.form.isValid()){
+						//msgWindow.show();
+						var id = paypal1.getForm().getFieldValues().p_root_id;
+						var starttime=Ext.util.Format.date(paypal1.getForm().getFieldValues().start,'Y-m-d');
+						var endtime = Ext.util.Format.date(paypal1.getForm().getFieldValues().end,'Y-m-d');
+						window.open('index.php?model=order&action=exportpaypal&id='+id+'&start='+starttime+'&end='+endtime);
+
+				}
+			}
+        },{
+        	text: '重置',
+			handler:function(){top.form.reset();}
+        }]
+    });	
+	var tab = new Ext.TabPanel({
+        activeTab: 0,
+		deferredRender:false,
+        defaults:{autoScroll: true,autoHeight:true},
+        items:[{
+			    id:'tab1',
+                title: 'Ebay账号',
+				layout:'form',
+				height:600,
+				defaultType: 'textfield',
+				autoScroll:true,
+                items:[top,paypal,paypal1]
+				},
+				{
+			    id:'tab2',
+                title: 'Amazon账号',
+				layout:'form',
+				height:600,
+				defaultType: 'textfield',
+				autoScroll:true,
+                items:[az]
+				},
+				{
+			    id:'tab3',
+                title: 'Taobao账号',
+				layout:'form',
+				height:600,
+				defaultType: 'textfield',
+				autoScroll:true,
+                items:[tb]
+				},
+				{
+			    id:'tab5',
+                title: 'zencart账号',
+				layout:'form',
+				height:600,
+				defaultType: 'textfield',
+				autoScroll:true,
+                items:[zencart]
+				},
+				{
+			    id:'tab6',
+                title: 'magento账号',
+				layout:'form',
+				height:600,
+				defaultType: 'textfield',
+				autoScroll:true,
+				disabled:true,
+                items:[]
+				}
+				]
+	});
+	tab.render(document.body);
+
+    loadend();
+});
+</script>
+<!--{include file="footer.tpl"}-->

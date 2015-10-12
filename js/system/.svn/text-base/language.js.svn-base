@@ -1,0 +1,103 @@
+Ext.ux.LanguageGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.LanguageGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: 'name',
+						dataIndex: 'name'
+					},{
+						header: 'code',
+						dataIndex: 'code'
+					},{
+						header: '排序',
+						dataIndex: 'sort_order'
+					},{
+						header: '是否活动',
+						dataIndex: 'is_active',
+						renderer:function(v){return (v == 0)?'否':'是';}
+					}];
+        this.columns = cols;
+    },
+    createTbar: function() {
+        this.tbar = [{
+            text: '创建',
+            iconCls: 'x-tbar-add',
+            handler: this.createRecord.createDelegate(this)
+        }, {
+            text: '编辑',
+            iconCls: 'x-tbar-update',
+			ref: '../editBtn',
+			disabled:true,
+            handler: this.updateRecord.createDelegate(this)
+        }, {
+            text: '删除',
+            iconCls: 'x-tbar-del',
+			ref: '../removeBtn',
+			disabled:true,
+            handler: this.removeRecord.createDelegate(this)
+        }];
+    },
+	createFormtiems:function(){
+		
+		var data = Ext.getCmp('languid').getSelectionModel().getSelected();
+		if(data)var is_active = data.get('is_active');
+
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		}
+						/*,{
+						fieldLabel: 'name',
+						xtype:'textfield',
+						vtype:'alpha',
+						minLength:3,
+						maxLength:5,
+						name:'name'
+					}*/
+					,{
+						fieldLabel: 'name',
+						xtype:'textfield',
+						allowNegative:false,
+						allowDecimals:true,
+						decimalPrecision:5,
+						allowBlank:false,
+						name:'name'
+					}
+					,{
+						fieldLabel: 'code',
+						xtype:'textfield',
+						allowNegative:false,
+						allowDecimals:true,
+						decimalPrecision:5,
+						allowBlank:false,
+						name:'code'
+					},{
+						fieldLabel: '排序',
+						xtype:'numberfield',
+						allowNegative:false,
+						allowDecimals:true,
+						decimalPrecision:5,
+						allowBlank:false,
+						name:'sort_order'
+					},{xtype:'combo',
+						store:new Ext.data.SimpleStore({
+							fields:["appkey","account"],
+							data:[['1','是'],['0','否']]}),
+							valueField:"appkey",
+							displayField:"account",
+							mode:'local',
+							editable:false,
+							forceSelection:true,
+							triggerAction:'all',
+							value: is_active,
+							width:100,
+							allowBlank:false,
+							hiddenName:'is_active',
+							fieldLabel:'是否活动',
+							id:'is_active'
+								}];	
+		this.formitem = items;
+	}
+});

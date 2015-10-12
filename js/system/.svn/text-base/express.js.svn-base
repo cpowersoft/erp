@@ -1,0 +1,355 @@
+Ext.ux.ExpressRuleGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.ExpressRuleGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '规则',
+						dataIndex: 'rule_id',
+						renderer:this.renderers[1]
+					},{
+						header: '值',
+						dataIndex: 'value'
+					},{
+					header: '快递方式',
+					dataIndex: 'express_id',
+					renderer:this.renderers[0]
+					},{
+					header: '先后顺序(数字大的优先)',
+					dataIndex: 'order_by'
+					}];
+        this.columns = cols;
+    },
+	
+	createFormtiems:function(){
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+	                    xtype:'combo',
+	            		store: new Ext.data.SimpleStore({
+							fields: ["retrunValue", "displayText"],
+							data: this.arrdata[1]
+	                    }),
+						valueField :"retrunValue",
+	                    displayField: "displayText",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'rule_id',
+	                    fieldLabel: '规则',
+	                    emptyText:'选择',
+	                    name: 'rule_id',
+						allowBlank:false,
+						blankText:'请选择'
+					},{
+						fieldLabel: '值',
+						xtype:'textfield',
+						name:'value'
+					},{
+	                    xtype:'combo',
+	            		store: new Ext.data.SimpleStore({
+							fields: ["retrunValue", "displayText"],
+							data: this.arrdata[0]
+	                    }),
+						valueField :"retrunValue",
+	                    displayField: "displayText",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'express_id',
+	                    fieldLabel: '快递方式',
+	                    emptyText:'选择',
+	                    name: 'express_id',
+						allowBlank:false,
+						blankText:'请选择'
+					},{
+						fieldLabel: '排序大小',
+						xtype:'numberfield',
+						allowNegative:false,
+						allowDecimals:false,
+						allowBlank:false,
+						name:'order_by'
+					}];	
+		this.formitem = items;
+	}
+});
+Ext.ux.ExpressMarkGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.ExpressMarkGrid.superclass.initComponent.call(this);
+    },
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '快递方式',
+						dataIndex: 'express_id',
+						renderer:this.renderers
+					},{
+						header: 'Carrier Name',
+						dataIndex: 'value'
+					},{
+						header: '标记名',
+						dataIndex: 'name'
+					}];
+        this.columns = cols;
+    },
+	createFormtiems:function(){
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+	                    xtype:'combo',
+	            		store: new Ext.data.SimpleStore({
+							fields: ["retrunValue", "displayText"],
+							data: this.arrdata
+	                    }),
+						valueField :"retrunValue",
+	                    displayField: "displayText",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'express_id',
+	                    fieldLabel: '规则',
+	                    emptyText:'选择',
+	                    name: 'express_id',
+						allowBlank:false,
+						blankText:'请选择'
+					},{
+						fieldLabel: 'Carrier Name',
+						xtype:'textfield',
+						name:'value'
+					},{
+						fieldLabel: '标记名',
+						xtype:'textfield',
+						name:'name'
+					}];	
+		this.formitem = items;
+	}
+});
+Ext.ux.UnMarkGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.UnMarkGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '快递方式',
+						dataIndex: 'express_id',
+						renderer:this.renderers
+					}];
+        this.columns = cols;
+    },
+	
+	createFormtiems:function(){
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+	                    xtype:'combo',
+	            		store: new Ext.data.SimpleStore({
+							fields: ["retrunValue", "displayText"],
+							data: this.arrdata
+	                    }),
+						valueField :"retrunValue",
+	                    displayField: "displayText",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'express_id',
+	                    fieldLabel: '规则',
+	                    emptyText:'选择',
+	                    name: 'express_id',
+						allowBlank:false,
+						blankText:'请选择'
+					}];	
+		this.formitem = items;
+	}
+});
+
+Ext.ux.NtMarkGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.NtMarkGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '快递方式',
+						dataIndex: 'express_id',
+						renderer:this.renderers
+					}];
+        this.columns = cols;
+    },
+	
+	createFormtiems:function(){
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+	                    xtype:'combo',
+	            		store: new Ext.data.SimpleStore({
+							fields: ["retrunValue", "displayText"],
+							data: this.arrdata
+	                    }),
+						valueField :"retrunValue",
+	                    displayField: "displayText",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'express_id',
+	                    fieldLabel: '规则',
+	                    emptyText:'选择',
+	                    name: 'express_id',
+						allowBlank:false,
+						blankText:'请选择'
+					}];	
+		this.formitem = items;
+	}
+});
+
+Ext.ux.ExpressDepotGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.ExpressDepotGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '快递方式',
+						dataIndex: 'shipping_id',
+						renderer:this.renderers
+					},{
+						header: '发货仓库',
+						dataIndex: 'depot'
+					}];
+        this.columns = cols;
+    },
+	
+	createFormtiems:function(){
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+	                    xtype:'combo',
+	            		store: new Ext.data.SimpleStore({
+							fields: ["retrunValue", "displayText"],
+							data: this.arrdata
+	                    }),
+						valueField :"retrunValue",
+	                    displayField: "displayText",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'shipping_id',
+	                    fieldLabel: '规则',
+	                    emptyText:'选择',
+	                    name: 'shipping_id',
+						allowBlank:false,
+						blankText:'请选择'
+					},{
+	                    xtype:'combo',
+						store: new Ext.data.SimpleStore({
+									 fields: ["id", "key_type"],
+									 data: this.depot
+							}),
+	                    valueField :"id",
+	                    displayField: "key_type",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'depot_id',
+	                    fieldLabel: '所属仓库',
+	                    emptyText:'选择',
+	                    name: 'depot_id',
+						allowBlank:false,
+						blankText:'请选择'
+					}];	
+		this.formitem = items;
+	}
+});
+
+Ext.ux.ExpressCostGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.ExpressCostGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '快递方式',
+						dataIndex: 'express_id',
+						renderer:this.renderers
+					},{
+						header: 'Shipping Formula',
+						dataIndex: 'value'
+					}];
+        this.columns = cols;
+    },
+	
+	createFormtiems:function(){
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+	                    xtype:'combo',
+	            		store: new Ext.data.SimpleStore({
+							fields: ["retrunValue", "displayText"],
+							data: this.arrdata
+	                    }),
+						valueField :"retrunValue",
+	                    displayField: "displayText",
+	                    mode: 'local',
+	                    editable: false,
+	                    forceSelection: true,
+	                    triggerAction: 'all',
+	                    hiddenName:'express_id',
+	                    fieldLabel: '快递方式',
+	                    emptyText:'选择',
+	                    name: 'express_id',
+						allowBlank:false,
+						blankText:'请选择'
+					},{
+						fieldLabel: '计算公式',
+						xtype:'textfield',
+						allowBlank:false,
+						name:'value'
+					}];	
+		this.formitem = items;
+	}
+});
+Ext.ux.ExpressAreaGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.ExpressAreaGrid.superclass.initComponent.call(this);
+    },
+	
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '区域',
+						dataIndex: 'area'
+					}];
+        this.columns = cols;
+    },
+	
+	createFormtiems:function(){
+        var items = [{
+						xtype:'hidden',
+						name: this.fields[0]
+            		},{
+						fieldLabel: '区域',
+						xtype:'textfield',
+						allowBlank:false,
+						name: this.fields[1]
+					},{
+						fieldLabel: '国家集合',
+						xtype:'textarea',
+						width:210,
+						allowBlank:false,
+						name: this.fields[2]
+					}];	
+		this.formitem = items;
+	}
+});

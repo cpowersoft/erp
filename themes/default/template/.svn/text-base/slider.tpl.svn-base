@@ -1,0 +1,90 @@
+<style type="text/css"> 
+.container a{TEXT-DECORATION:none;color:#000;font-size:12px}
+.container a:hover{TEXT-DECORATION:none;;color:#000;font-size:12px}
+.container {height:60px;width:450px;float:right;}
+.container div{width:400px; height:60px}
+.container img{border:0}
+.container ul{list-style:none;margin:0;padding:0;}
+.container li{list-style:none;margin:0;padding:0; height:62px}
+.num{position:absolute; bottom:0px;right:3px; height:18px;}
+.num li{
+	float: left;
+	color: #FFF;
+	text-align: center;
+	line-height: 12px;
+	width: 12px;
+	height: 12px;
+	font-family: Arial;
+	font-size: 10px;
+	cursor: pointer;
+	margin-left: 3px;
+	border: 1px solid #B1CBED;
+	background-color: #64B4F2;
+}
+.num li.on{
+	line-height: 14px;
+	width: 14px;
+	height: 14px;
+	font-size: 12px;
+	margin-top:-2px;
+	background-color: #009FE9;
+	font-weight: bold;
+	color:#FFF;
+}
+</style>
+<div class="container" id="idContainer2">
+	<ul id="idSlider2">
+		<li><div>
+<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+  <td width="80px"><a href="http://item.taobao.com/item.htm?id=21060752855" target="_blank"><img width="60px" height="60px" src="http://img04.taobaocdn.com/bao/uploaded/i4/T1ojIaXfJXXXXsfe.0_034837.jpg_160x160.jpg" alt="ECPP配套电子秤" /></a></td>
+    <td valign="middle"><a href="http://item.taobao.com/item.htm?id=21060752855" target="_blank">ECPP配套电子秤,可直接保存包裹重量与ECPP对接导入订单重量</a></td>
+  </tr>
+</table>
+</div></li>
+<li><div>
+<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="80px"><a href="http://item.taobao.com/item.htm?id=16613577465" target="_blank"><img width="60px" height="60px" src="http://img02.taobaocdn.com/bao/uploaded/i2/19195027807372467/T1r7AhXXVhXXXXXXXX_!!0-item_pic.jpg_160x160.jpg" alt="ECPP配套标签纸" /></a></td>
+    <td valign="middle"><a href="http://item.taobao.com/item.htm?id=16613577465" target="_blank">ECPP配套热敏标签纸,无需碳带</a></td>
+  </tr>
+</table>
+</div></li>
+<li><div>
+<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="80px"><a href="http://item.taobao.com/item.htm?id=17991155126" target="_blank"><img width="60px" height="60px" src="http://img04.taobaocdn.com/bao/uploaded/i4/T1ve.dXbXcXXXfQJc7_063849.jpg_160x160.jpg" alt="气泡信封" /></a></td>
+    <td valign="middle"><a href="http://item.taobao.com/item.htm?id=17991155126" target="_blank">各种规格气泡信封,可定制</a></td>
+  </tr>
+</table>
+</div></li><li><div>
+<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="80px"><a href="http://item.taobao.com/item.htm?id=16666893378" target="_blank"><img width="60px" height="60px" src="http://img01.taobaocdn.com/bao/uploaded/i1/19195028193300275/T1JuY1XglnXXXXXXXX_!!0-item_pic.jpg_160x160.jpg" alt="激光条码扫描枪" /></a></td>
+    <td valign="middle"><a href="http://item.taobao.com/item.htm?id=16666893378" target="_blank">激光条码扫描枪,无线扫描枪</a></td>
+  </tr>
+</table>
+</div></li>
+	</ul>
+	<ul class="num" id="idNum">
+	</ul>
+</div>
+<script>
+var nums = [], timer, n = $$("idSlider2").getElementsByTagName("li").length,
+	st = new SlideTrans("idContainer2", "idSlider2", n, {
+		onStart: function(){//设置按钮样式
+			forEach(nums, function(o, i){ o.className = st.Index == i ? "on" : ""; })
+		}
+	});
+for(var i = 1; i <= n; AddNum(i++)){};
+function AddNum(i){
+	var num = $$("idNum").appendChild(document.createElement("li"));
+	num.innerHTML = i--;
+	num.onmouseover = function(){
+		timer = setTimeout(function(){ num.className = "on"; st.Auto = false; st.Run(i); }, 200);
+	}
+	num.onmouseout = function(){ clearTimeout(timer); num.className = ""; st.Auto = true; st.Run(); }
+	nums[i] = num;
+}
+st.Run();
+</script>

@@ -1,0 +1,173 @@
+<!--{include file="header.tpl"}-->
+    <style type="text/css">
+        body .x-panel {
+            margin:0 0 20px 10px;
+        }
+    </style>
+<script type="text/javascript" src="js/normalgrid.js"></script>
+<script type="text/javascript" src="js/system/express.js"></script>
+    <script type="text/javascript">
+Ext.onReady(function() {
+	Ext.QuickTips.init();
+	var shipping = [<!--{$shipping}-->];
+	var express_rule = [<!--{$express_rule}-->];
+	var depot = [<!--{$depot}-->];
+	var shippingarr = object_Array(shipping);
+	var express_rulearr = object_Array(express_rule);
+	function shipping_ren(val){
+		return shippingarr[val];
+	}
+	function rule_ren(val){
+		return express_rulearr[val];
+	}
+	Ext.form.Field.prototype.msgTarget = 'side';
+    var ExpressRuleGrid = new Ext.ux.ExpressRuleGrid({
+		id:'ExpressRuleGrid',
+        title: '快递规则列表',
+		headers:['序号','规则','值','快递方式','先后排序'],
+        fields: ['id','rule_id','value','express_id','order_by'],
+		renderers:[shipping_ren,rule_ren],
+		arrdata:[shipping,express_rule],
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=express&action=Update',
+		delURL:'index.php?model=express&action=delete',
+		listURL:'index.php?model=express&action=List',
+		windowTitle:'快递规则',
+		windowWidth:350,
+		windowHeight:180,
+        renderTo: document.body
+    });
+    var ExpressDepotGrid = new Ext.ux.ExpressDepotGrid({
+		id:'ExpressMarkGrid',
+        title: '仓库分配',
+		headers:['序号','快递方式','发货仓库'],
+        fields: ['id','shipping_id','depot','depot_id'],
+		renderers:shipping_ren,
+		arrdata:shipping,
+		depot:depot,
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=express&action=depotUpdate',
+		delURL:'index.php?model=express&action=depotdelete',
+		listURL:'index.php?model=express&action=depotList',
+		windowTitle:'快递分配仓库',
+		windowWidth:350,
+		windowHeight:180,
+        renderTo: document.body
+    });
+    var ExpressCostGrid = new Ext.ux.ExpressCostGrid({
+		id:'ExpressCostGrid',
+        title: '运费计算公式,参数:{weight},重量为G',
+		headers:['序号','快递方式','计算公式'],
+        fields: ['id','express_id','value'],
+		renderers:shipping_ren,
+		arrdata:shipping,
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=express&action=CostUpdate',
+		delURL:'index.php?model=express&action=Costdelete',
+		listURL:'index.php?model=express&action=CostList',
+		windowTitle:'运费规则',
+		windowWidth:350,
+		windowHeight:180,
+        renderTo: document.body
+    });
+    var ExpressMarkGrid = new Ext.ux.ExpressMarkGrid({
+		id:'ExpressMarkGrid',
+        title: 'Ebay标记对应名称',
+		headers:['序号','快递方式','Ebay Carrier Name','标记名'],
+        fields: ['id','express_id','value','name'],
+		renderers:shipping_ren,
+		arrdata:shipping,
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=express&action=MarkUpdate',
+		delURL:'index.php?model=express&action=Markdelete',
+		listURL:'index.php?model=express&action=MarkList',
+		windowTitle:'快递规则',
+		windowWidth:350,
+		windowHeight:180,
+        renderTo: document.body
+    });
+    var UnMarkGrid = new Ext.ux.UnMarkGrid({
+		id:'UNMarkGrid',
+        title: '标记发货忽略单号(列表中物流方式将不再标记追踪号到对应平台)',
+		headers:['序号','快递方式'],
+        fields: ['id','express_id'],
+		renderers:shipping_ren,
+		arrdata:shipping,
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=express&action=UnMarkUpdate',
+		delURL:'index.php?model=express&action=UnMarkdelete',
+		listURL:'index.php?model=express&action=UnMarkList',
+		windowTitle:'快递规则',
+		windowWidth:350,
+		windowHeight:180,
+        renderTo: document.body
+    });
+    var NtMarkGrid = new Ext.ux.NtMarkGrid({
+		id:'UNMarkGrid',
+        title: '有追踪号标记(列表中物流方式将会在订单有追踪号才会进入待标记列表)',
+		headers:['序号','快递方式'],
+        fields: ['id','express_id'],
+		renderers:shipping_ren,
+		arrdata:shipping,
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=express&action=NtMarkUpdate',
+		delURL:'index.php?model=express&action=NtMarkdelete',
+		listURL:'index.php?model=express&action=NtMarkList',
+		windowTitle:'快递规则',
+		windowWidth:350,
+		windowHeight:180,
+        renderTo: document.body
+    });
+    var ExpressAreaGrid = new Ext.ux.ExpressAreaGrid({
+		id:'ExpressArea',
+        title: '快递区域划分',
+		headers:['序号','快递方式'],
+        fields: ['id','area','content'],
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=express&action=areaUpdate',
+		delURL:'index.php?model=express&action=areadelete',
+		listURL:'index.php?model=express&action=areaList',
+		windowTitle:'快递区域',
+		windowWidth:350,
+		windowHeight:180,
+        renderTo: document.body
+    });
+	var detailpanel = new Ext.Panel({
+		width:600,
+		frame:true,
+		title:'已知标记规则',
+		html:'<p><img src="data/shipping_mark.jpg"></p><p><img src="data/shipping_mark_1.jpg"></p>',
+		renderTo: document.body
+	});
+	ExpressDepotGrid.getStore().load({
+			params:{start:0,limit:ExpressDepotGrid.pagesize}
+			});	
+	ExpressAreaGrid.getStore().load({
+			params:{start:0,limit:ExpressAreaGrid.pagesize}
+			});	
+	ExpressRuleGrid.getStore().load({
+			params:{start:0,limit:ExpressRuleGrid.pagesize}
+			});	
+	ExpressCostGrid.getStore().load({
+			params:{start:0,limit:ExpressMarkGrid.pagesize}
+			});	
+	ExpressMarkGrid.getStore().load({
+			params:{start:0,limit:ExpressMarkGrid.pagesize}
+			});
+	UnMarkGrid.getStore().load({
+			params:{start:0,limit:UnMarkGrid.pagesize}
+			});	
+	NtMarkGrid.getStore().load({
+			params:{start:0,limit:NtMarkGrid.pagesize}
+			});	
+	loadend();
+});
+    </script>
+<!--{include file="footer.tpl"}-->

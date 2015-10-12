@@ -1,0 +1,25 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript" src="js/system/system.js"></script>
+<script type="text/javascript">
+Ext.onReady(function(){
+	var info = eval(<!--{$info}-->);
+	Ext.QuickTips.init();
+    Ext.form.Field.prototype.msgTarget = 'side';
+	var systemForm = new Ext.ux.systemForm({
+		title:'系统设置',
+		border:true,
+		region:'center',
+		labelAlign: 'right',
+        labelWidth: 105,
+		info:info,
+		saveURL:'index.php?model=system&action=save',
+        autoWidth: true,
+		autoHeight:true,
+		renderTo:'fordiv'
+	});
+	loadend();
+});
+</script>
+<div id='fordiv'></div>
+<h1><a href="http://www.softsilkroad.com/blog/?p=401" target="_blank">E邮宝揽件地址区域编码</a></h1>
+<!--{include file="footer.tpl"}-->

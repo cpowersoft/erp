@@ -1,0 +1,138 @@
+Ext.ux.bankLogGrid=Ext.extend(Ext.grid.GridPanel,{
+	initComponent:function(){
+		this.autoHeight = true;
+        this.viewConfig = {
+            forceFit: true
+        };
+		this.createStore();
+		this.creatBbar();
+		this.createTbar();
+		this.createColumns();
+		Ext.ux.bankLogGrid.superclass.initComponent.call(this);
+	},
+	createStore:function(){
+		this.store=new Ext.data.Store({proxy:new Ext.data.HttpProxy({url:this.listURL}),
+		pruneModifiedRecords:true,
+		reader:new Ext.data.JsonReader({root:'topics',totalProperty:'totalCount',id:this.fields[0]},this.fields)});
+		this.store.load({
+			params:{start:0,limit:this.pagesize},
+			scope:this.store
+			});
+		this.store.on('beforeload',function(){Ext.apply(this.baseParams,{
+								account_id:Ext.getCmp('account_id').getValue(),
+								type:Ext.getCmp('type').getValue(),
+								deal_type:Ext.getCmp('deal_type').getValue(),
+								starttime:Ext.fly('starttime').dom.value,
+								totime:Ext.fly('totime').dom.value,
+			});});},
+	createColumns:function(){
+		var cols=[new Ext.grid.RowNumberer(),
+			{header:'账户',dataIndex:'account',width:100,renderer:function(val,x,rec){
+				var str=(rec.get('comment'))?'<img src="themes/default/images/comment.gif" title="'+rec.get('comment')+'">':'';
+				var ordersn='<b>'+val+'</b>';return ordersn+str;}},
+			{header:'收/支',dataIndex:'type'},
+			{header:'款项类型',dataIndex:'deal_type'},
+			{header:'单据编号',dataIndex:'order_sn',width:100},
+			{header:'金额',dataIndex:'money'},
+			{header:'余额',dataIndex:'balance'},
+			{header:'操作时间',dataIndex:'time'},
+			{header:'创建人',dataIndex:'add_user'},
+			{header:'确认人',dataIndex:'confirm_user'},
+			];this.columns=cols;},
+	   createTbar: function() {
+		var pagesize = this.pagesize;
+		var store = this.store;
+		var listURL=this.listURL;
+        this.tbar = ['选择账户:',{xtype:'combo',
+						store: new Ext.data.SimpleStore({
+							 fields: ["id", "key_type"],
+							 data: this.powerBank
+						}),
+						valueField :"id",
+						displayField: "key_type",
+						mode: 'local',
+						width:80,
+						editable: false,
+						forceSelection: true,
+						triggerAction: 'all',
+						hiddenName:'account_id',
+						id: 'account_id',
+						value:-1,
+					},'-','收支类型:',{xtype:'combo',
+						store: new Ext.data.SimpleStore({
+							 fields: ["id", "key_type"],
+							 data: [['-1','所有收支'],['0','收入'],['1','支出']]
+						}),
+						valueField :"id",
+						displayField: "key_type",
+						mode: 'local',
+						width:80,
+						editable: false,
+						forceSelection: true,
+						triggerAction: 'all',
+						hiddenName:'type',
+						id: 'type',
+						value:-1,
+					},'-','款项类型:',{xtype:'combo',
+						store: new Ext.data.SimpleStore({
+							 fields: ["id", "key_type"],
+							 data: [['-1','所有款项'],['0','收款'],['1','付款'],['2','费用'],['3','账户改动']]
+						}),
+						valueField :"id",
+						displayField: "key_type",
+						mode: 'local',
+						width:80,
+						editable: false,
+						forceSelection: true,
+						triggerAction: 'all',
+						hiddenName:'deal_type',
+						id: 'deal_type',
+						value:-1,
+					},'-','开始时间:',{
+						xtype:'datefield',
+						id:'starttime',
+						format:'Y-m-d',
+						fieldLabel:'From'
+					},'-','结束时间:',{
+						xtype:'datefield',
+						id:'totime',
+						format:'Y-m-d',
+						fieldLabel:'To'
+					},'-',{
+						xtype:'button',
+						text:'搜索',
+						iconCls:'x-tbar-search',
+						handler:function(){
+							store.load({params:{
+								account_id:Ext.getCmp('account_id').getValue(),
+								type:Ext.getCmp('type').getValue(),
+								deal_type:Ext.getCmp('deal_type').getValue(),
+								starttime:Ext.fly('starttime').dom.value,
+								totime:Ext.fly('totime').dom.value,
+								start:0,
+								limit:pagesize
+								}});
+							}
+					},'-',{
+						text:'导出搜索结果',
+						xtype:'button',
+						iconCls:'x-tbar-import',
+						handler:function(){
+							window.open().location.href=listURL+'&etype=export&account_id='+Ext.getCmp('account_id').getValue()+'&type='+Ext.getCmp('type').getValue()+'&deal_type='+Ext.getCmp('deal_type').getValue()+'&starttime='+Ext.fly('starttime').dom.value+'&totime='+Ext.fly('totime').dom.value;
+						}
+					}];
+    },
+	 
+	creatBbar: function() {
+		var	pagesize = this.pagesize;
+       	this.bbar=new Ext.PagingToolbar({
+			plugins: new Ext.ui.plugins.ComboPageSize(),
+			pageSize: pagesize,
+			store: this.store,
+			displayInfo: true,
+			displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+			emptyMsg: "没有数据"
+        });
+    }
+	});
+	

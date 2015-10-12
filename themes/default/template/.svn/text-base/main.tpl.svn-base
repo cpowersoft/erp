@@ -1,0 +1,161 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+var Tree = Ext.tree;
+var root = new Tree.AsyncTreeNode({
+	text: 'Ext JS',
+	draggable:false,
+	id:'root'
+});
+
+var tree = new Ext.tree.TreePanel({
+	contentEl:'west',
+	border:true,
+	root:root,
+	region:'west',
+	id:'west-panel',
+	split:true,
+	width: 200,
+	minSize: 175,
+	maxSize: 400,
+	margins:'0 0 0 0',
+	layout:'accordion',
+	title:'功能菜单',
+	collapsible :true,
+	layoutConfig:{
+		animate:true
+		},
+	rootVisible:false,
+	autoScroll:true,
+	loader: new Tree.TreeLoader({
+		dataUrl:'index.php?model=main&action=tree'
+		})
+	});
+tree.on('click',treeClick);
+//tree.expandAll();
+var tab = new Ext.TabPanel({
+	region:'center',
+	enableTabScroll:true,
+	deferredRender:false,
+	activeTab:0,
+	items:[{
+		contentEl:'center2',
+		title: '首页',
+		autoScroll:true,
+		items:[{
+				autoWidth:true,
+				style:'margin:15 25',
+				layout:'column',
+				border:false,
+				items:[{
+					columnWidth:.4,
+					items:[new Ext.Panel({
+					title:'内部新闻',
+					border:false,
+					html:'<!--{foreach from =$news item = newsinfo}-->[<!--{$newsinfo.create_time|date_format:"%Y-%m-%d"}-->]:<a href="#" onclick="javascript:opennews(<!--{$newsinfo.id}-->)"> <!--{$newsinfo.news_title}--></a><!--{if $newsinfo.is_read eq 0}--><img src="themes/default/images/icons/flag_green.png"><!--{/if}--><br><!--{/foreach}--><a href="#" onclick="javascript:morenews()">更多...</a>'			
+				})]
+						}]
+				  },new Ext.Panel({
+					title:'订单信息',
+					autoWidth:true,
+					style:'margin:15 25',
+					html:'paypal校对订单:<!--{$num1}--><br>客服审核数量:<!--{$num2}--><br>库管审核数量:<!--{$num3}--><br>待处理订单数量:<!--{$num4}--><br>手动标记缺货:<!--{$num5}--><br>正在拣货:<!--{$num6}--><br>'			
+				}),{
+				autoWidth:true,
+				style:'margin:15 25',
+				layout:'column',
+				border:false,
+				items:[{
+					columnWidth:.5,
+					items:[new Ext.Panel({
+						title:'当天发货统计',
+							border:false,
+						html:'<br><!--{foreach from =$shippingnum item = shipping name=shippingitem}--><!--{if $shipping.num > 0}--><!--{$shipping.name}-->:<!--{$shipping.num}--><br><!--{/if}--><!--{/foreach}-->'			
+					})]
+						},{
+					columnWidth:.48,
+					style:'margin-left:20;',
+					items:[new Ext.Panel({
+					title:'订单状态对应表',
+					border:false,
+					html:'<div style="width:40%;float:left;">UUU:ebay加载订单完成<br>UUO:自动审核通过<br>UOO:客服审核通过<br>POO:库管审核通过<br>UUF:自动审核失败<br>UOH:客服审核失败<br>HOO:库管审核失败<br>SSS:现款录单<br>UFO:货到付款录单<br>CMB:合并作废<br>POH:订单处理暂停<br>PUO:货到付款库管审核通过<br>HUO:货到付款库管审核失败</div><div style="width:50%;float:left;">DEL:订单作废<br>UFF:客服审核退款中<br>FOO:库管审核退款中<br>FFF:退款完成<br>PUH:货到付款订单处理暂停<br>PPP:订单处理完成<br>UPO:到付处理完成<br>OOO:订单核对完成<br>UPP:到付核对完成<br>OOF:已完成订单退款<br>PPS:处理完成缺货<br>UPS:到付处理缺货</div>'
+				})]
+						}]
+		  },new Ext.Panel({
+				title:'系统信息',
+				autoWidth:true,
+				closable:true,
+				collapsible:true,
+				style:'margin:15 25',
+				html:'初始化配置说明:<br>1.定制版本系统数据库配置信息在config.cfg.php,可进行针对性修改<br>2.系统初次试用请先在系统模块中的基础环境配置销售参数和系统设置中进行系统的相关参数配置'			
+			})
+		]
+	}]
+});
+function treeClick(node,e) {
+	 if(node.isLeaf()){
+		e.stopEvent();
+		var n = tab.getComponent(node.id);
+		if (!n) {
+			var url = (node.attributes.model.substr(0,7) == 'http://')?node.attributes.model:'index.php?model='+node.attributes.model+'&action='+node.attributes.action;
+			var n = tab.add({
+				'id' : node.id,
+				'title' : node.text,
+				closable:true,
+				html : '<iframe scrolling="auto" frameborder="0" width="100%" height="100%" src="'+url+'"></iframe>'
+				});
+		}
+		tab.setActiveTab(n);
+	 }
+}
+function newTab(id,text,url) {
+	  var n = tab.getComponent(id);
+		if (!n) {
+			var n = tab.add({
+				'id' : id,
+				'title' : text,
+				closable:true,
+				html : '<iframe scrolling="auto" frameborder="0" width="100%" height="100%" src="'+url+'"></iframe>'
+				});
+		}
+		tab.setActiveTab(n);
+}
+function opennews(id)
+{
+	parent.openWindow('30001000', '查看新闻', 'index.php?model=news&action=show&id='+id,600,500);
+}
+function morenews()
+{
+	newTab('400181','内部新闻','index.php?model=news')
+}
+Ext.onReady(function(){
+   var viewport = new Ext.Viewport({
+		layout:'border',
+		items:[
+			new Ext.BoxComponent({
+				region:'north',
+				el: 'north',
+				height:70
+			}),
+			tree,
+			tab
+		 ]
+	});
+	tree.render();
+	root.expand();
+	loadend();
+	//Ext.getCmp('softinfo').load({url: 'index.php?model=system&action=softinfo',text: 'Loading...',timeout: 30});
+});
+	function feedback(){
+		Ext.example.msg('test','测试中');
+	}
+	function track(){
+		newTab('tracking','快递查询','index.php?model=system&action=track');
+	}
+</script>
+<div id="north">
+<a href="#" target="_blank"><img src="themes/default/images/logo.png" style="margin-left:15px;float:left;vertical-align:top;height:60px;"></a><p class="api-title"><span style="color:#F00"><!--{$smarty.session.admin_name}--></span>  <a style="color:#06F" href="?action=logout">[退出]</a> | <a href="#" onclick="track()">快递查询</a> |</p>
+</div>
+<div id="west">
+</div>
+<div id="center2"></div>
+<!--{include file="footer.tpl"}-->

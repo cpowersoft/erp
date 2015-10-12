@@ -1,0 +1,157 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+//Ext.util.CSS.swapStyleSheet("theme", "ext/resources/css/xtheme-" + themeName + ".css");
+
+Ext.onReady(function(){
+	var ds = new Ext.data.Store({
+		proxy : new Ext.data.HttpProxy({url:'index.php?model=dd&action=itemList&id=<!--{$smarty.get.id}-->'}),
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            totalProperty: 'totalCount',
+            id: 'id'
+			},[
+			'id','di_value','di_caption'
+      	])
+    });
+    
+
+	var colModel = new Ext.grid.ColumnModel([
+		 {header:'值', width:100,sortable:true,dataIndex:'di_value'},
+		 {header:'名称',width:160,sortable:true,dataIndex:'di_caption'}
+		]);
+	
+		
+	var grid = new Ext.grid.GridPanel({
+		border:false,
+		region:'center',
+		loadMask: true,
+		el:'center',
+		title:'条目列表',
+		store: ds,
+		cm: colModel,
+		autoScroll: true,
+		buttons:[{
+            text: '删除',
+			handler:function(){
+				var ids = getIds(grid);
+				if (ids) {
+					Ext.Msg.confirm('确认', '真的要删除1吗？', function(btn){
+						if (btn == 'yes'){
+							Ext.Ajax.request({
+							   url: 'index.php?model=dd&action=delete&ids='+ids,
+							   success: function(result){
+									ds.reload();
+									}
+							});
+						}
+					});		
+				
+				} else {
+					Ext.example.msg('出错啦','你还没有选择要操作的记录！');
+				}
+			}
+        }]
+    });
+    var sm = grid.getSelectionModel();
+	sm.addListener('rowselect', function () {
+		var s = grid.getSelectionModel().getSelected();
+		Ext.Ajax.request({
+				   url: 'index.php?model=dd&action=getInfo&id='+s.id,
+				   success: function(result){
+						json = Ext.util.JSON.decode(result.responseText);
+						Ext.fly('di_id').dom.value=json.id;
+						Ext.fly('di_value').dom.value=json.di_value;
+						Ext.fly('di_caption').dom.value=json.di_caption;
+						}
+				});
+	});
+    Ext.QuickTips.init();
+    Ext.form.Field.prototype.msgTarget = 'side';
+    var top=new Ext.FormPanel({
+        buttonAlign:'right',
+		labelWidth:40,
+        frame:false, 
+        border:false,
+        bodyStyle:'padding:5px 5px 0',
+		width:240,
+		defaults: {width: 175},
+		defaultType: 'textfield',
+        items: [{
+        		xtype:'numberfield',
+        		allowDecimals:false,
+        		id:'di_value',
+                fieldLabel: '值',
+                allowBlank:false,
+				/*
+                validator:function(v) {
+                	if (v=='0') {
+                		return false;
+                	}
+                	return true;
+                },
+				*/
+                name: 'di_value'
+            },{
+                fieldLabel: '名称',
+                id:'di_caption',
+                allowBlank:false,
+                name: 'di_caption'
+            },{
+				xtype:'hidden',
+				name: 'di_id',
+				id:'di_id',
+				value: ''
+			},{
+				xtype:'hidden',
+				name: 'dd_id',
+				value: '<!--{$smarty.get.id}-->'
+			}],
+
+        buttons: [{
+            text: '保存',
+				handler:function(){
+					if(top.form.isValid()){
+						top.form.doAction('submit',{
+							 url:'index.php?model=dd&action=save',
+							 method:'post',
+							 params:'',
+							 success:function(form,action){
+							 	if (action.result.msg!='OK') {
+							 		Ext.Msg.alert('出错啦',action.result.msg);
+							 	} else {
+							 		Ext.example.msg('操作','保存成功!');
+							 		ds.reload();
+							 		top.form.reset();
+							 	}
+							 },
+							 failure:function(){
+									Ext.example.msg('操作','服务器出现错误请稍后再试！');
+							 }
+                      });
+					}
+					}
+        },{
+            text: '重置',
+			handler:function(){top.form.reset();}
+        }]
+    });
+	var viewport = new Ext.Viewport({
+        layout:'border',
+        items:[
+			grid,{
+				region:'south',
+				title:'管理字典项',
+				collapsible: true,
+				height: 130,
+				border:false,
+				items:top
+                }
+		]}
+	);
+	ds.load({params:{start:0, limit:30, forumId: 4}});
+	loadend();
+});
+</script>
+  <div id="north-div"></div>
+  <div id="center"></div>
+<!--{include file="footer.tpl"}-->

@@ -1,0 +1,156 @@
+<!--{include file="header.tpl"}-->
+    <style type="text/css">
+			html, body {
+				background-color:#FFF;
+				text-align:center;
+			}
+			.formitem {
+				height:40px;
+				float:left;
+				}
+			.loginwin{
+				background-color:#FFF;
+			}
+			.x-form-display-field{
+				float:left;
+				clear:none;				
+			}
+			.itemlabel{
+				vertical-align:middle;
+				height:35px;
+				}
+			#footer {
+			width: 900px;
+			clear:both;
+			text-align: center;
+			margin:auto;
+			}
+    </style>
+<script type="text/javascript">
+Ext.onReady(function(){
+    Ext.QuickTips.init();
+    var simple = new Ext.FormPanel({
+        frame:true,
+		cls:'loginwin',
+		itemCls:'formitem',
+		unstyled :true,
+        width: 320,
+		labelWidth:80,
+		labelStyle :'itemlabel',
+		shadow:true,
+		bodyBorder:false,
+		plain:true,
+		buttonAlign:'center',
+        defaults: {width: 150,height:35},
+		labelAlign:"right",
+        defaultType: 'textfield',
+        items: [{
+                fieldLabel: '用户名',
+                name: 'username',
+                allowBlank:false,
+				blankText:'请填写你的用户名',
+				enableKeyEvents:true,
+				listeners:{
+				scope:this,
+				keypress:function(field,e){
+					if(e.getKey()==13){
+						var obj = simple.form.findField("passwd");
+						if(obj) obj.focus();
+						}
+					}
+				}
+            },{
+				xtype:'textfield',
+            	inputType:'password',
+                fieldLabel: '密　码',
+                allowBlank:false,
+                name: 'passwd',
+				enableKeyEvents:true,
+				listeners:{
+				scope:this,
+				keypress:function(field,e){
+					if(e.getKey()==13){
+						var obj = simple.form.findField("valid");
+						if(obj) obj.focus();
+						}
+					}
+				}
+            },{
+                fieldLabel: '验证码',
+                name: 'valid',
+                allowBlank:false,
+                id:'valid',
+				blankText:'请填写右边的验证码',
+				enableKeyEvents:true,
+				listeners:{
+				scope:this,
+				keypress:function(field,e){
+					if(e.getKey()==13){
+						formsubmit();
+						}
+					}
+				}
+           },{
+			  xtype:'displayfield',
+			  id:'valid1',
+			  width:1
+			}
+        ],
+        buttons: [{
+				text :'登录',
+				type: 'submit', 
+				handler:function(){formsubmit();}
+			},{
+					text: '取消',
+					handler:function(){simple.form.reset();}
+			}]
+    });
+    simple.render(document.getElementById('loginForm'));
+    var bd = Ext.getDom('valid1');
+
+    var bd2 = Ext.fly(bd.parentNode);
+    bd2.createChild({tag: 'img',id:'checkimg', src: 'index.php?action=showImg&d='+Math.random(8),align:'absbottom',title:'单击图片更换验证码',onclick:'changeimg(this)'});
+	loadend();
+
+	var formsubmit = function(){
+					if(simple.form.isValid()){
+						simple.form.doAction('submit',{
+							 url:'index.php?action=login',
+							 method:'post',
+							 params:'',
+							 success:function(form,action){
+							 		if (action.result.msg=='OK') {
+										document.location='index.php?model=main';
+									} else {
+										Ext.example.msg('登录出错',action.result.msg);
+							 		}
+							 },
+							 failure:function(){
+									Ext.example.msg('操作','服务器出现错误请稍后再试！');
+							 }
+                      });
+					}
+				}
+});
+	function changeimg(obj){
+	obj.src = 'index.php?action=showImg&d='+Math.random(8);
+	}
+
+</script>
+<div style="Z-INDEX: 10000; LEFT: 0px; WIDTH: 100%; POSITION: absolute; margin: 0px;">
+<div style="height:90px;background:url(themes/default/images/LOGIN_r1_c2.jpg) repeat-x 0 0;">
+<div style="width:900px;margin-left:auto;margin-right:auto;">
+<a href="#" target="_blank"><img src="themes/default/images/logo.png" style="margin-left:15px;float:left;vertical-align:top;height:83px;"></a><span style="float:right"><!--<img src="themes/default/images/ebay.gif" width="70px"/>--></span>
+</div>
+</div>
+<div style=" background-repeat:no-repeat;background-image:url(themes/default/images/ad.jpg);height:370px;width:900px;margin-top:40px;margin-left:auto;margin-right:auto;">
+<div style="float:right;margin-right:25px;margin-top:-25px;padding-top:10px;height:352px;width:322px;border:1px solid #999; background-color:#FFF;">
+<img src="themes/default/images/LOGIN_r3_c4.jpg" height="70px" />
+<div align="center" id="loginForm"></div>
+</div>
+</div>
+<div id="footer">
+<hr>
+Copyright © 2013 - 2015 YGERP. 深圳市影歌科技有限公司. <a href="#" target="_blank">官网</a></div>
+</div>
+<!--{include file="footer.tpl"}-->

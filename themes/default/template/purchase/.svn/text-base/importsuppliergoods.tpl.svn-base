@@ -1,0 +1,134 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+Ext.onReady(function(){
+	Ext.QuickTips.init();
+	var Supplierstore = new Ext.data.Store({
+			proxy : new Ext.data.HttpProxy({url:'index.php?model=supplier&action=userlist'}),
+			autoLoad:true,
+			reader: new Ext.data.JsonReader({
+					root: 'topics',
+					totalProperty: 'totalCount',
+					id: 'id'
+					},['id','name'])
+		});
+    var simple1 = new Ext.FormPanel({
+        labelWidth: 75,
+        frame:true,
+        title: '供应商批量导入',
+		fileUpload:true,
+        bodyStyle:'padding:5px 5px 0',
+        width: 350,
+        defaults: {width: 150},
+        defaultType: 'textfield',
+		renderTo:document.body,
+        items: [{
+				fieldLabel: 'xls文件',
+				inputType: 'file',
+				xtype: 'textfield',
+				allowBlank:false,
+				name:'file_path1'
+            }
+        ],
+
+        buttons: [{
+				text: '导入供应商',
+				type: 'submit',
+				handler:function(){formsubmit1();}
+			}]
+    });
+    var simple = new Ext.FormPanel({
+        labelWidth: 75,
+        frame:true,
+        title: '供应商产品批量导入',
+		fileUpload:true,
+        bodyStyle:'padding:5px 5px 0',
+        width: 350,
+        defaults: {width: 150},
+        defaultType: 'textfield',
+		renderTo:document.body,
+        items: [{
+								xtype:'combo',
+								store: Supplierstore,
+								valueField :"id",
+								displayField: "name",
+								mode: 'remote',
+								width:100,
+								forceSelection: true,
+								triggerAction: 'all',
+								hiddenName:'supplier',
+								fieldLabel: '供应商',
+								allowBlank:false,
+								emptyText:'请选择供应商',
+								pageSize:30,
+								minListWidth:220,
+								id:'supplier_id',
+									listeners: {
+										beforequery:function(qe){
+											qe.combo.store.on('beforeload',function(){
+												Ext.apply(
+												this.baseParams,
+												{
+													key:qe.query
+												});
+												});
+												qe.combo.store.load();
+											}
+										}							
+							},{
+				fieldLabel: 'xls文件',
+				inputType: 'file',
+				xtype: 'textfield',
+				allowBlank:false,
+				name:'file_path'
+            }
+        ],
+
+        buttons: [{
+				text: '导入',
+				type: 'submit',
+				handler:function(){formsubmit();}
+			}]
+    });
+	var formsubmit1 = function(){
+					  if(simple1.form.isValid()){
+						simple1.form.doAction('submit',{
+							 url:'index.php?model=supplier&action=importsuppiler',
+							 method:'post',
+							 params:'',
+							 success:function(form,action){
+							 		if (action.result.success) {
+										Ext.example.msg('导入成功',action.result.msg);
+									} else {
+										Ext.Msg.alert('导入错误',action.result.msg);
+							 		}
+							 },
+							 failure:function(form,action){
+									Ext.Msg.alert('操作',action.result.msg);
+							 }
+                      });
+					}
+				}
+	var formsubmit = function(){
+		if(!Ext.getCmp('supplier_id').getValue()) Ext.example.msg('Error','请选择供应商进行导入！');
+					  if(simple.form.isValid()){
+						simple.form.doAction('submit',{
+							 url:'index.php?model=supplier&action=upload',
+							 method:'post',
+							 params:'',
+							 success:function(form,action){
+							 		if (action.result.success) {
+										Ext.example.msg('导入成功',action.result.msg);
+									} else {
+										Ext.Msg.alert('导入错误',action.result.msg);
+							 		}
+							 },
+							 failure:function(form,action){
+									Ext.Msg.alert('操作',action.result.msg);
+							 }
+                      });
+					}
+				}
+	loadend();
+});
+</script>
+<!--{include file="footer.tpl"}-->

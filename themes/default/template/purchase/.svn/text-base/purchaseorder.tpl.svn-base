@@ -1,0 +1,34 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript" src="js/purchase/Purchaseorder.js"></script>
+<script type="text/javascript">
+Ext.onReady(function(){
+	Ext.QuickTips.init();
+	var status = [['1','审核通过'],['2','部分到货'],['3','完成收货'],['4','采购结单'],['0','采购下单']];
+	status.push(['99','所有状态']);
+    var PorderView = new Ext.ux.PorderView({
+        title: '采购订单',
+		headers:['序号','采购单号','总数量','总金额','供应商','预计到货','到货时间','采购员','状态','添加人'],
+        fields: ['order_id','order_sn', 'totalqty','totalamt','supplier','pre_time','arrive_time','operator','status','add_user','realstatus','comment','overtime'],
+		pagesize:15,
+		status:status,
+		windowWidth:320,
+		windowHeight:240,
+		goodswinWidth:900,
+		goodswinHeight:450,
+		frame:true,
+		autoWidth:true,
+		goodsURL:'index.php?model=Purchaseorder&action=getgoods',
+		listURL:'index.php?model=Purchaseorder&action=list',
+		updateURL:'index.php?model=Purchaseorder&action=update',
+		listUserURL:'index.php?model=User&action=UserList',
+		listSupplierURL:'index.php?model=supplier&action=userlist',
+		printURL:'index.php?model=Purchaseorder&action=print',
+		addstockURL:'index.php?model=Stockin&action=add&type=cgrk',
+		returnURL:'index.php?model=Purchasereturn&action=add&type=cgth',
+        renderTo: document.body
+    });
+	
+	loadend();
+});
+</script>
+<!--{include file="footer.tpl"}-->

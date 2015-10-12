@@ -1,0 +1,205 @@
+html, body {
+	font:normal 12px verdana;
+	margin:0;
+	padding:0;
+	border:0 none;
+	height:100%;
+	background-color: #d2e0f2;
+}
+p {
+	margin:5px;
+}
+#north{
+   border:0 none;
+   background:#1E4176 url(../images/LOGIN_r1_c2.jpg) repeat-x 0 0;
+   padding-top:3px;
+   padding-left:3px;
+}
+#north .api-title {
+	color:#666;
+	float:right;
+	vertical-align:top;
+    margin:5px;
+}
+#loading-mask{
+	position:absolute;
+	left:0;
+	top:0;
+    width:100%;
+    height:100%;
+    z-index:20000;
+    background-color:white;
+}
+#loading{
+	position:absolute;
+	left:45%;
+	top:40%;
+	padding:2px;
+	z-index:20001;
+    height:auto;
+}
+#loading .loading-indicator{
+	background:white;
+	color:#555;
+	font:bold 13px tahoma,arial,helvetica;
+	padding:10px;
+	margin:0;
+    text-align:center;
+    height:auto;
+}
+.mail-btn{
+	padding-top:3px;
+	border-bottom:1px solid #99bbe8;
+	background:url(../images/bg.gif);
+	text-align:center;
+	height:25px;
+	color:#555;
+	font-size:14px;
+}
+.mail-btn a:link {
+	color: #555;
+	text-decoration: none;
+}
+.mail-btn a:visited {
+	text-decoration: none;
+}
+.mail-btn a:hover {
+	text-decoration: none;
+}
+.mail-btn a:active {
+	text-decoration: none;
+}
+.msg .x-box-mc {
+    font-size:14px;
+}
+#msg-div {
+    position:absolute;
+    left:35%;
+    top:10px;
+    width:250px;
+    z-index:20000;
+}
+.x-window-footer {
+position: relative;
+top: 0;
+right: 0;
+}
+
+.x-tab-strip SPAN.x-tab-strip-text {
+font-size: 12px;
+}
+
+.x-panel-header {
+font-size: 12px;
+}
+
+.x-tree-node {
+font-size: 12px;
+}
+
+.x-grid3-hd-row TD {
+font-size: 12px;
+*font:normal 11px arial,tahoma,helvetica,sans-serif;
+}
+
+.x-grid3-row TD {
+font-size: 12px;
+*font:normal 11px arial,tahoma,helvetica,sans-serif;
+LINE-HEIGHT: 16px;
+*LINE-HEIGHT: 13px;
+-moz-user-select:text;/*fix for Firefox to get the grid data selectable*/
+}
+.x-grid3-row td,
+.x-grid3-summary-row td,
+.x-grid3-cell-text,
+.x-grid3-hd-text,
+.x-grid3-hd,
+.x-grid3-row {
+	-moz-user-select:inherit;
+	-khtml-user-select:text;
+}
+.x-tip .x-tip-bd {
+font-size: 12px;
+}
+
+.x-tip h3 {
+font-size: 12px;
+}
+
+.x-tip .x-tip-bd-inner {
+font-size: 12px;
+}
+
+.x-panel-tl .x-panel-header {
+FONT: normal 12px tahoma, arial, verdana, sans-serif;
+}
+
+.x-form-field {
+FONT: 12px tahoma, arial, helvetica, sans-serif
+}
+
+.x-small-editor .x-form-field {
+FONT: 12px tahoma, arial, helvetica, sans-serif
+}
+
+.x-combo-list-item {
+FONT: 12px tahoma, arial, helvetica, sans-serif;
+}
+
+.x-menu-list-item {
+FONT: 12px tahoma, arial, sans-serif;
+}
+
+.x-window-tl .x-window-header {
+FONT: bold 12px tahoma, arial, verdana, sans-serif;
+}
+
+/*.x-layout-split-west .x-layout-mini {
+BACKGROUND-IMAGE: url(../images/mini-left.jpg);
+}*/
+
+.ext-ie .x-form-text {
+margin-top: 1px;
+} /* the textField missing bottom line */
+.x-form-item {
+FONT: 12px tahoma, arial, helvetica, sans-serif
+}
+
+.x-grid-group-hd DIV {
+FONT: bold 12px tahoma, arial, helvetica, sans-serif;
+*font:bold 11px tahoma,arial,helvetica,sans-serif;
+}
+
+.x-btn button {
+font-size: 12px;
+} 
+.x-tbar-add{
+	background-image: url(../images/add.gif) !important;
+}
+.x-tbar-del{
+	background-image: url(../images/del.gif) !important;
+}
+.x-tbar-update{
+	background-image: url(../images/update.gif) !important;
+}
+.x-tbar-save{
+	background-image: url(../images/save.gif) !important;
+}
+.x-tbar-import{
+	background-image: url(../images/import.gif) !important;
+}
+.x-tbar-search{
+	background-image: url(../images/search.gif) !important;
+}
+.x-tbar-advsearch{
+	background-image: url(../images/Advsearch.gif) !important;
+}
+.x-tbar-print{
+	background-image: url(../images/icons/printer.png) !important;
+}
+.hidden{
+	visibility:hidden;	
+}
+.iconpadding{
+	padding:0 3px;
+	}

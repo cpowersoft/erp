@@ -1,0 +1,56 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+Ext.onReady(function(){
+	var ds = new Ext.data.Store({
+		proxy : new Ext.data.HttpProxy({url:'index.php?model=log&action=list'}),
+        reader: new Ext.data.JsonReader({
+			root: 'topics',
+            totalProperty: 'totalCount',
+            id: 'id'
+			},[
+			'id','user_id','log_time','module_name','log_object','log_ip','content'
+      	])
+    });
+    
+
+	var colModel = new Ext.grid.ColumnModel([
+		 {header:'用户ID',width:50,sortable:true,dataIndex:'user_id'},
+		 {header:'时间', width:100,sortable:true,dataIndex:'log_time'},
+		 {header:'模块名',width:100,sortable:true,dataIndex:'module_name'},
+		 {header:'对象ID',width:50,sortable:true,dataIndex:'log_object'},
+		 {header:'IP',width:150,sortable:true,dataIndex:'log_ip'},
+		 {header:'内容',sortable:true,dataIndex:'content'}
+		]);
+	//var tb = new Ext.Toolbar('north-div');//创建一个工具条
+	
+	var grid = new Ext.grid.GridPanel({
+				border:false,
+				region:'center',
+				loadMask: true,
+				el:'center',
+				title:'条目列表',
+				store: ds,
+				cm: colModel,
+				autoScroll: true,
+				bbar: new Ext.PagingToolbar({
+					pageSize: 20,
+					store: ds,
+					displayInfo: true,
+					displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+					emptyMsg: "没有数据"
+        		})
+            });
+	var viewport = new Ext.Viewport({
+        layout:'border',
+        items:[
+			grid
+		]}
+	);
+	ds.load({params:{start:0, limit:20,ff:6}});
+
+	loadend();
+});
+</script>
+  
+  <div id="center"></div>
+<!--{include file="footer.tpl"}-->

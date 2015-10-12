@@ -1,0 +1,60 @@
+<!--{include file="header.tpl"}-->
+    <style type="text/css">
+        body .x-panel {
+            margin:0 0 20px 10px;
+        }
+    </style>
+<script type="text/javascript" src="js/normalgrid.js"></script>
+<script type="text/javascript" src="js/goods/category.js"></script>
+    <script type="text/javascript">
+Ext.onReady(function() {
+	Ext.QuickTips.init();
+	Ext.form.Field.prototype.msgTarget = 'side';	
+	var MessageGrid = new Ext.ux.NormalGrid({
+		id:'BrandGrid',
+        title: '客户回复Message模板列表',
+		headers:['序号','模板名','内容','排序值'],
+        fields: ['rec_id','temp_name','temp_content','temp_sn'],
+		width:600,
+		frame:true,
+		saveURL:'index.php?model=template&action=update',
+		delURL:'index.php?model=template&action=del',
+		listURL:'index.php?model=template&action=messageList',
+		formitems:[{
+				xtype:'hidden',
+                name: 'rec_id'
+				},{
+				xtype:'hidden',
+                name: 'cat_id',
+				value:1
+				},{
+				name:'temp_name',
+				fieldLabel:'模板名',
+				allowBlank:false,
+				blankText:'此项必填'
+				},{
+				name:'temp_sn',
+				fieldLabel:'排序值',
+				xtype:'numberfield',
+				decimalPrecision:4,
+				allowDecimals:true,
+				allowBlank:false,
+				blankText:'此项必填'
+				},{
+				xtype:'textarea',
+				width:470,
+				height:410,
+				name:'temp_content',
+				fieldLabel:'内容',
+				allowBlank:false
+				}],
+		windowTitle:'模板编辑',
+		windowWidth:600,
+		windowHeight:550,
+        renderTo: document.body
+	});
+	MessageGrid.getStore().load();
+	loadend();
+});
+    </script>
+<!--{include file="footer.tpl"}-->

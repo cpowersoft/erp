@@ -1,0 +1,482 @@
+﻿Ext.ux.RmaGrid = Ext.extend(Ext.grid.GridPanel, {
+    initComponent: function() {
+		this.createStore();
+        this.createTypeStore();
+        this.createFormtiems();
+        this.createTbar();
+        this.createBbar();
+        this.createColumns();
+        this.getSelectionModel().on('selectionchange',
+        function(sm) {
+            this.grid.removeBtn.setDisabled(sm.getCount() < 1);
+            this.grid.editBtn.setDisabled(sm.getCount() < 1);
+        });
+        Ext.ux.RmaGrid.superclass.initComponent.call(this);
+    },
+    createColumns: function() {
+        var thiz = this;
+        var ds = this.store;
+        var cols = [new Ext.grid.RowNumberer(), {
+            header: 'RMA单据ID',
+            dataIndex: 'rma_sn',
+            width: 128,
+            renderer: function(val, x, rec) {
+                var str = (rec.get('remark')) ? '<img src="themes/default/images/comment.gif" title="' + rec.get('remark') + '">': '';
+                return '<b>' + val + '</b>' + str;
+            }
+        },
+        {
+            header: '订单号',
+            width: 115,
+            dataIndex: 'order_sn'
+        },
+        {
+            header: '重发订单号',
+            width: 115,
+            dataIndex: 'new_order_sn'
+        },
+        {
+            header: '账号',
+            width: 80,
+            dataIndex: 'Sales_account_id'
+        },
+        {
+            header: 'buyerID',
+            width: 80,
+            dataIndex: 'userid'
+        },
+        {
+            header: '发货日期',
+            width: 80,
+            dataIndex: 'end_time'
+        },
+        {
+            header: '问题产品',
+            dataIndex: 'goods_sn'
+        },
+        {
+            header: '数量',
+            width: 40,
+            dataIndex: 'quantity'
+        },
+        {
+            header: 'Reason',
+            dataIndex: 'reason',
+            renderer: thiz.renderers
+        },
+        {
+            header: '国家',
+            dataIndex: 'country'
+        },
+        {
+            header: '退回方式',
+            width: 80,
+            dataIndex: 'return_form'
+        },
+        {
+            header: 'tracking',
+            width: 80,
+            dataIndex: 'tracking'
+        },
+        {
+            header: '状态',
+            width: 60,
+            dataIndex: 'rma_status'
+        },
+        {
+            header: '退回时间',
+            width: 75,
+            dataIndex: 'return_time'
+        },
+        {
+            header: '快递方式',
+            width: 75,
+            dataIndex: 'shipping_id'
+        },{
+            header: '追踪单号',
+            width: 75,
+            dataIndex: 'track_no'
+        },{
+            header: '实际重量',
+            width: 75,
+            dataIndex: 'weight'
+        },
+        {
+            header: '实际运费',
+            width: 75,
+            dataIndex: 'shipping_cost'
+        },{
+            header: '订单总金额',
+            width: 75,
+            dataIndex: 'order_amount'
+        },{
+            header: '退款金额',
+            width: 75,
+            dataIndex: 'refund'
+        },{
+            header: '添加人',
+            width: 75,
+            dataIndex: 'admin_id'
+        },
+        {
+            header: '添加时间',
+            width: 75,
+            dataIndex: 'addtime'
+        },
+        {
+            header: '操作',
+            width: 75,
+            xtype: 'actioncolumn',
+            renderer: function(v, m, rec) {
+                if (rec.get('realstatus') > 0) {
+                    this.items[0].iconCls = 'hidden';
+                    this.items[1].iconCls = 'hidden';
+                    this.items[2].iconCls = 'hidden';
+                } else {
+                    this.items[0].iconCls = 'iconpadding';
+                    this.items[1].iconCls = 'iconpadding';
+                    this.items[2].iconCls = 'iconpadding';
+                }
+            },
+            items: [{
+                icon: 'themes/default/images/del.gif',
+                tooltip: '退付款',
+                iconCls: 'iconpadding',
+                handler: function(grid, rowIndex, colIndex) {
+                    var rec = ds.getAt(rowIndex);
+                    parent.openWindow(id, '新建付款单', 'index.php?model=finance&action=addpay&ordersn=' + rec.get('order_sn'), 300, 360);
+                }
+            },
+            {
+                icon: 'themes/default/images/drop-add.gif',
+                tooltip: '订单重发',
+                iconCls: 'iconpadding',
+                handler: function(grid, rowIndex, colIndex) {
+                    var id = ds.getAt(rowIndex).get('order_id');
+                    parent.openWindow(id, '新建重发订单', 'index.php?model=order&action=add&id=' + id, 1000, 680);
+                }
+            },
+            {
+                icon: 'themes/default/images/flag_green.gif',
+                tooltip: '不处理',
+                handler: function(grid, rowIndex, colIndex) {
+                    var rec = ds.getAt(rowIndex);
+                    thiz.change_status(rec.get('id'), 2);
+                }
+            }]
+        }];
+        this.columns = cols;
+    },
+	createTypeStore: function() {},
+    createStore: function() {
+        this.store = new Ext.data.Store({
+            proxy: new Ext.data.HttpProxy({
+                url: this.listURL
+            }),
+            pruneModifiedRecords: true,
+            reader: new Ext.data.JsonReader({
+                root: 'topics',
+                totalProperty: 'totalCount',
+                id: this.fields[0]
+            },
+            this.fields)
+        });
+		this.store.on('beforeload',function(){
+			Ext.apply(
+			this.baseParams,
+			{
+				starttime:Ext.fly('starttime').dom.value,
+				totime:Ext.fly('totime').dom.value,
+				goods_sn: Ext.fly('goods_sn').dom.value,
+				reasonid: Ext.getCmp('reasonid').getValue(),
+				accountid: Ext.getCmp('accountid').getValue()
+			});
+		});
+    },
+	createFormtiems: function() {
+        this.formitem = this.formitems;
+    },
+    createTbar: function() {
+		 this.tbar = [{
+            text: '创建',
+            iconCls: 'x-tbar-add',
+            handler: this.createRecord.createDelegate(this)
+        },
+        {
+            text: '编辑',
+            iconCls: 'x-tbar-update',
+            ref: '../editBtn',
+            disabled: true,
+            handler: this.updateRecord.createDelegate(this)
+        },
+        {
+            text: '删除',
+            iconCls: 'x-tbar-del',
+            ref: '../removeBtn',
+            disabled: true,
+            handler: this.removeRecord.createDelegate(this)
+        }];
+        this.tbar.push(this.createSearchForm())
+    },
+    createSearchForm: function() {
+        var store = this.store;
+        var sales_account = this.sales_account;
+        var reason = this.reason;
+        var listURL = this.listURL;
+        var pagesize = this.pagesize;
+        return ['->', '账户：', {
+            xtype: 'combo',
+            store: new Ext.data.SimpleStore({
+                fields: ["id", "key_type"],
+                data: sales_account
+            }),
+            valueField: "id",
+            width: 100,
+            displayField: "key_type",
+            mode: 'local',
+            editable: false,
+            forceSelection: true,
+            triggerAction: 'all',
+            hiddenName: 'accountid',
+            value: 0,
+            name: 'account_id',
+            id: 'accountid'
+        },'-',
+        '原因：', {
+            xtype: 'combo',
+            store: new Ext.data.SimpleStore({
+                fields: ["id", "key_type"],
+                data: reason
+            }),
+            valueField: "id",
+            width: 100,
+            displayField: "key_type",
+            mode: 'local',
+            editable: false,
+            forceSelection: true,
+            triggerAction: 'all',
+            hiddenName: 'reason',
+            value: '',
+            name: 'reason',
+            id: 'reasonid'
+        },'-',
+        '产品：', {
+            xtype: 'textfield',
+            width: 80,
+            name: 'goods_sn',
+            id: 'goods_sn',
+            value: ''
+        },'-','开始时间:',{
+						xtype:'datefield',
+						id:'starttime',
+						format:'Y-m-d',
+						fieldLabel:'From',
+						invalidText:'格式错误！'
+					},'-','结束时间:',{
+						xtype:'datefield',
+						id:'totime',
+						format:'Y-m-d',
+						fieldLabel:'To',
+						invalidText:'格式错误！'
+					},
+        '-', {
+            xtype: 'button',
+            text: '搜索',
+            iconCls: 'x-tbar-search',
+            handler: function() {
+                store.load({
+                    params: {
+                        start: 0,
+                        limit: pagesize,
+						starttime:Ext.fly('starttime').dom.value,
+						totime:Ext.fly('totime').dom.value,
+                        goods_sn: Ext.fly('goods_sn').dom.value,
+                        reasonid: Ext.getCmp('reasonid').getValue(),
+                        accountid: Ext.getCmp('accountid').getValue()
+                    }
+                });
+            }
+        },
+        '-', {
+            text: '导出统计结果',
+            xtype: 'button',
+            iconCls: 'x-tbar-import',
+            handler: function() {
+                window.open().location.href = listURL + '&type=export&starttime='+Ext.fly('starttime').dom.value+'&totime='+Ext.fly('totime').dom.value+'&goods_sn='+Ext.fly('goods_sn').dom.value+'&reasonid='+Ext.getCmp('reasonid').getValue()+'&accountid='+Ext.getCmp('accountid').getValue();
+            }
+        }];
+    },
+	
+	createBbar: function() {
+        var pagesize = this.pagesize;
+        this.bbar = new Ext.PagingToolbar({
+            pageSize: pagesize,
+            displayInfo: true,
+            displayMsg: '第{0} 到 {1} 条数据 共{2}条',
+            emptyMsg: "没有数据",
+            store: this.store
+        });
+    },
+    createRecord: function() {
+        this.showWindow();
+        var form = this.getForm();
+        form.baseParams = {
+            create: true
+        };
+        form.setValues(this.getEmptyRecord());
+    },
+    updateRecord: function() {
+        var r = this.getSelectedRecord();
+        if (r != false) {
+            this.showWindow();
+            var form = this.getForm();
+            form.baseParams = {
+                create: false
+            };
+            form.loadRecord(r);
+        }
+    },
+    afterEdit: function() {},
+    afterRemove: function() {},
+    removeRecord: function() {
+        var r = this.getSelectionModel().getSelections();
+        var ids = getIds(this);
+        var thiz = this.store;
+        afterRemove = this.afterRemove;
+        if (r != false) {
+            Ext.Msg.confirm('Delete Alert!', 'Are you sure?',
+            function(btn) {
+                if (btn == 'yes') {
+                    Ext.Ajax.request({
+                        url: this.delURL + '&ids=' + ids,
+                        success: function(response, opts) {
+                            var res = Ext.decode(response.responseText);
+                            if (res.success) {
+                                thiz.remove(r);
+                                afterRemove();
+                                Ext.example.msg('MSG', res.msg);
+                            } else {
+                                Ext.Msg.alert('ERROR', res.msg);
+                            }
+                        }
+                    });
+                }
+            },
+            this);
+        }
+    },
+    getSelectedRecord: function() {
+        var sm = this.getSelectionModel();
+        if (sm.getCount() == 0) {
+            Ext.example.msg('Info', 'Please select one row.');
+            return false;
+        } else {
+            return sm.getSelections()[0];
+        }
+    },
+    getEmptyRecord: function() {
+        var r = {};
+        for (var i = 0; i < this.fields.length; i++) {
+            var f = this.fields[i];
+            r[f] = '';
+        }
+        return r;
+    },
+    submitRecord: function() {
+        var form = this.getForm();
+        var values = form.getFieldValues();
+        afterEdit = this.afterEdit;
+        var thiz = this.store;
+        if (form.isValid()) {
+            form.doAction('submit', {
+                url: this.saveURL,
+                method: 'post',
+                params: '',
+                success: function(form, action) {
+                    if (action.result.success) {
+                        thiz.reload();
+                        afterEdit();
+                        Ext.example.msg('MSG', action.result.msg);
+                    } else {
+                        Ext.Msg.alert('修改失败', action.result.msg);
+                    }
+                },
+                failure: function() {
+                    Ext.example.msg('操作', '服务器出现错误请稍后再试！');
+                }
+            });
+        }
+        this.hideWindow();
+    },
+    getForm: function() {
+        return this.getFormPanel().getForm();
+    },
+    getFormPanel: function() {
+        if (!this.gridForm) {
+            this.gridForm = this.createForm();
+        }
+        return this.gridForm;
+    },
+    createForm: function() {
+        var form = new Ext.form.FormPanel({
+            frame: true,
+            defaultType: 'textfield',
+            buttonAlign: 'center',
+            labelAlign: 'right',
+            labelWidth: 70,
+            trackResetOnLoad: true,
+            reader: new Ext.data.ArrayReader({
+                fields: this.fields
+            }),
+            items: this.formitem,
+            buttons: [{
+                text: 'submit',
+                handler: this.submitRecord.createDelegate(this)
+            },
+            {
+                text: 'reset',
+                handler: function() {
+                    form.getForm().reset();
+                }
+            }]
+        });
+        return form;
+    },
+    showWindow: function() {
+        this.getWindow().show();
+    },
+    hideWindow: function() {
+        this.getWindow().hide();
+    },
+    getWindow: function() {
+        if (!this.gridWindow) {
+            this.gridWindow = this.createWindow();
+        }
+        return this.gridWindow;
+    },
+    createWindow: function() {
+        var formPanel = this.getFormPanel();
+        var win = new Ext.Window({
+            title: this.windowTitle,
+            closeAction: 'hide',
+            constrainHeader: true,
+            width: this.windowWidth,
+            height: this.windowHeight,
+            modal: true,
+            items: [formPanel]
+        });
+        return win;
+    },
+    change_status: function(id, status_num) {
+        var thiz = this.store;
+        Ext.Ajax.request({
+            url: 'index.php?model=rma&action=changestatus&id=' + id + '&status=' + status_num,
+            success: function(response) {
+                var result = Ext.decode(response.responseText);
+                if (result.success == true) {
+                    thiz.reload();
+                }
+            }
+        });
+    }
+});

@@ -1,0 +1,213 @@
+Ext.ux.stockchangeForm = Ext.extend(Ext.FormPanel, {
+	initComponent: function() {
+		this.frame = true,
+		this.buttonAlign = 'center',
+		this.txt_totQty = new Ext.form.TextField({
+							id : 'txt_totQty',
+							anchor : '95%',
+							allowBlank : true,
+							value : 0,
+							readOnly : true,
+							fieldClass : 'textReadOnly'
+						}),
+		this.txt_totQty1 = new Ext.form.TextField({
+							id : 'txt_totQty1',
+							anchor : '95%',
+							allowBlank : true,
+							value : 0,
+							readOnly : true,
+							fieldClass : 'textReadOnly'
+						}),
+		this.creatGridcm();
+		this.creatGoodsstore();
+		this.creatGoodsgrid();
+		this.creatItems();
+		this.creatButtons();
+		this.goodsGrid.getSelectionModel().on('selectionchange', function(sm){
+			Ext.getCmp('removeBtn').setDisabled(!sm.hasSelection());
+		});
+        Ext.ux.stockchangeForm.superclass.initComponent.call(this);
+    },
+
+	
+	creatGoodsstore:function(){//订单明细store
+			var data = [['rec_id','sku1','sku2','goods_qty']];
+		this.goodsstore = new Ext.data.Store({
+			proxy : new Ext.data.MemoryProxy(data),
+			pruneModifiedRecords:true,
+			reader: new Ext.data.JsonReader({
+					root: 'topics',
+					totalProperty: 'totalCount',
+					id: 'rec_id'
+					},['rec_id','sku1','sku2','goods_qty']),
+			listeners : {
+				'load' : this.calculate.createDelegate(this),
+				'add' : this.calculate.createDelegate(this),
+				'remove' : this.calculate.createDelegate(this),
+				'update' : this.calculate.createDelegate(this)
+			}
+		});
+		//this.goodsstore.load();
+	},
+	
+	creatGridcm:function(){
+		var thiz = this;
+		this.cmlist = new Ext.grid.ColumnModel([{
+						header : '调入产品<font color=red>*</font>',
+						dataIndex:'sku1',
+						align : 'left',
+						editor:new Ext.form.TextField({
+								allowBlank:false,
+								hideLabel:true
+						})
+					}, {
+						header:'调出产品<font color=red>*</font>',
+						width:250,
+						dataIndex:'sku2',
+						align:'left',
+						editor:new Ext.form.TextField({
+								allowBlank:false,
+								hideLabel:true
+						})
+					}, {
+						header:'产品数量<font color=red>*</font>',
+						dataIndex:'goods_qty',
+						align:'right',
+						editor:new Ext.form.NumberField({
+							allowBlank:false,
+							allowNegative:false,
+							decimalPercision:4,
+							style:'text-align:left'
+						})
+					}]);
+	},
+
+	creatGoodsgrid:function(){//创建产品明细
+		this.goodsGrid =new Ext.grid.EditorGridPanel({
+					frame:true,
+					id : "destPanel",
+					title:'调换产品明细',
+					height : 300,
+					autoWidth : true,
+					cm : this.cmlist,
+					sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+					ds : this.goodsstore,
+					clicksToEdit : 1,
+					stripeRows : true, // 让基数行和偶数行的颜色不一样
+					viewConfig : {
+						forceFit : true
+					},
+					border : true,
+					iconCls : 'icon-grid',
+					tbar : new Ext.Toolbar({
+						items : [{
+							xtype:'button',
+							text:'新增产品',
+							id: 'addBtn',
+							iconCls: 'x-tbar-add',
+							handler:this.addItem.createDelegate(this)
+						},{
+							text: '删除',
+							iconCls: 'x-tbar-del',
+							id: 'removeBtn',
+							handler: this.removeItem.createDelegate(this),
+							disabled:true
+						}]
+					}),
+					bbar : new Ext.Toolbar({
+						cls : 'u-toolbar-b',
+						items : ['合计:', '->', '产品种类:', this.txt_totQty1,'-', '产品总计:', this.txt_totQty]
+					})
+				});
+	},
+
+	creatItems:function(){
+		this.items = [this.goodsGrid];
+	},
+
+	creatButtons:function(){
+		this.buttons = [{
+				text: '保存',
+				type: 'submit', 
+				handler:this.formsubmit.createDelegate(this)
+			},{
+					text: '取消',
+					handler:this.formreset.createDelegate(this)
+			}];
+	},
+
+	formsubmit:function(){
+		if(this.txt_totQty.getValue() == 0){ 
+				Ext.example.msg('错误提示','商品数量不能为空');
+				return false;
+				}
+		if(this.getForm().isValid()){
+				var m = this.goodsstore.modified.slice(0);
+				var thiz = this.goodsstore;
+				var jsonArray = [];
+				Ext.each(m,function(item){
+					jsonArray.push(item.data);				
+					});
+				this.getForm().doAction('submit',{
+					url:this.saveURL,
+					method:'post',
+					params:{'data':Ext.encode(jsonArray)},
+					success:function(form,action){
+						if (action.result.success) {
+								Ext.Msg.alert('MSG',action.result.msg);
+							} else {
+								Ext.Msg.alert('修改失败',action.result.msg);
+							}
+						},
+					failure:function(){
+							Ext.example.msg('ERROR',action.result.msg);
+						}
+				});
+		}else{
+			Ext.example.msg('ERROR','请正确完成表单内容');
+			}
+	},
+
+	formreset:function(){//表单重置
+		this.form.reset();
+	},
+
+	addItem:function(){//新增物品
+		var Item = Ext.data.Record.create([{
+			name:'rec_id',
+			type:'float'
+		},{
+			name : 'sku1'
+		}, {
+			name : 'sku2'
+		}, {
+			name : 'goods_qty',
+			type : 'float'
+		}]);
+		var p = new Item({rec_id:0,sku1:'',sku2:'',goods_qty:1});
+		this.goodsstore.insert(0, p);
+		this.goodsGrid.startEditing(0, 0); // 光标停留在第几行几列
+	},
+	removeItem:function(){//移除物品
+		var data = this.goodsGrid.getSelectionModel().getSelected().data;
+		var index = this.goodsstore.findBy(function(record,id){
+				return record.get('sku1') == data.sku1 && ecord.get('sku2') == data.sku2 && record.get('goods_qty') == data.goods_qty;									
+													});
+		var id = data.rec_id;
+		if(id ==0){
+			this.goodsstore.remove(this.goodsstore.getAt(index));return;
+		}
+	},
+
+	calculate:function(){//计算物品总数量和总金额
+		var i;
+		var totalQty = 0;
+		var totalAmt = 0;
+		for (i = 0; i < this.goodsstore.getCount(); i++) {
+			totalQty += this.goodsstore.getAt(i).get('goods_qty') * 10000;
+		}
+		this.txt_totQty1.setValue(this.goodsstore.getCount());
+		this.txt_totQty.setValue(totalQty / 10000);
+	}
+});
+

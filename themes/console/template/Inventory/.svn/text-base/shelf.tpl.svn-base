@@ -1,0 +1,31 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript" src="js/normalgrid.js"></script>
+<script type="text/javascript" src="js/inventory/shelf.js"></script>
+<script type="text/javascript">
+Ext.onReady(function(){
+	Ext.QuickTips.init();
+	var depot = [<!--{$depot}-->];
+    var ShelfGrid = new Ext.ux.ShelfGrid({
+        title: '当前库存',
+		headers:['shelf_id','货架名','所属仓库','发货货架'],
+        fields: ['shelf_id','name', 'depot','is_main','depot_id'],
+		pagesize:15,
+		depot:depot,
+		frame:true,
+		autoWidth:true,
+		autoHeight:true,
+		listURL:'index.php?model=Inventory&action=shelflist',
+		saveURL:'index.php?model=Inventory&action=shelfsave',
+		delURL:'index.php?model=Inventory&action=shelfdelete',
+		windowTitle:'编辑货架信息',
+		windowWidth:420,
+		windowHeight:180,
+        renderTo: document.body
+    });
+	ShelfGrid.getStore().load({
+			params:{start:0,limit:ShelfGrid.pagesize}
+			});
+	loadend();
+});
+</script>
+<!--{include file="footer.tpl"}-->

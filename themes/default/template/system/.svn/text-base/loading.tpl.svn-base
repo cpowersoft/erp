@@ -1,0 +1,7 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+Ext.onReady(function(){
+	loadend();
+});
+</script>
+<!--{include file="footer.tpl"}-->

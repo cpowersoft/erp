@@ -1,0 +1,208 @@
+Ext.ux.CategoryGrid = Ext.extend(Ext.ux.NormalGrid, {
+    initComponent: function() {
+        Ext.ux.CategoryGrid.superclass.initComponent.call(this);
+    },
+
+	createColumns: function() {
+        var cols = [new Ext.grid.RowNumberer(),{
+						header: '分类代码',
+						dataIndex: 'code'
+					},{
+						header: '分类名',
+						dataIndex: 'cat_name'
+					},{
+						header: '运费',
+						dataIndex: 'shipping_fee'
+					},{
+						header: '包装',
+						dataIndex: 'package_fee'
+					},{
+						header: '申报价值',
+						dataIndex: 'Declared_value'
+					},{
+						header: '申报名称',
+						dataIndex: 'dec_name'
+					},{
+					header: '所属分类',
+					dataIndex: 'parent_name'
+					},{
+					header: '所属分类id',
+					dataIndex: 'parent_id',
+					hidden:true
+					}];
+        this.columns = cols;
+    },
+
+	afterEdit:function(){
+		if(Ext.getCmp('cattree')) Ext.getCmp('cattree').load();
+	},
+
+	afterRemove:function(){
+		if(Ext.getCmp('cattree')) Ext.getCmp('cattree').load();
+	},
+    removeRecord: function() {
+        var r = this.getSelectionModel().getSelections();
+		if(r[0].data.haschild>0){
+			Ext.example.msg('错误','该分类拥有子类，请先删除子类');
+			return false;
+		}
+		var ids = getIds(this);
+		var thiz = this.store;
+		afterRemove = this.afterRemove;
+        if (r != false) {
+            Ext.Msg.confirm('Delete Alert!', 'Are you sure?', function(btn) {
+                if (btn == 'yes') {
+					Ext.Ajax.request({
+					   url: this.delURL+'&ids='+ids,
+						success:function(response,opts){
+							var res = Ext.decode(response.responseText);
+								if(res.success){
+								thiz.remove(r);
+								afterRemove();
+								Ext.example.msg('MSG',res.msg);
+								}else{
+								Ext.Msg.alert('ERROR',res.msg);
+								}						
+							}
+						});
+                }
+            }, this);
+        }
+    },
+	afterselect:function(k,v){
+		if(k == Ext.getCmp('cat_id').getValue()){
+				Ext.example.msg('错误','分类不能属于自身');
+				return false;
+			}
+		if(k == 'root') k=0;
+		Ext.getCmp('parent_name').setValue(v);
+		Ext.getCmp('parent_id').setValue(k);
+					Ext.getBody().mask("正在获取数据.请稍等...","x-mask-loading");
+					Ext.Ajax.request({
+					   url: 'index.php?model=goods&action=getcatcode',
+					   loadMask:true,
+					   params: { cat_id: k },
+						success:function(response,opts){
+							var res = Ext.decode(response.responseText);
+							Ext.getBody().unmask();
+								if(res.success){
+								if(res.msg!='') Ext.getCmp('code').setValue(res.msg);
+								}else{
+								Ext.Msg.alert('ERROR',res.msg);
+								}						
+							}
+						});
+		},
+	createFormtiems:function(){
+		var thiz = this.typestore;
+		var afterselect =this.afterselect;
+        var items = [{
+				xtype:'hidden',
+                id: 'cat_id'
+					},new Ext.form.TriggerField({
+					editable: false,
+					fieldLabel:'所属分类',
+					xtype:'trigger',
+					id:'parent_name',
+					value:'顶级分类',
+					onSelect: function(record){
+					},
+					onTriggerClick: function() {
+						getCategoryFormTree('index.php?model=goods&action=getcattree&com=0',1,afterselect);
+					}
+					}),{
+                fieldLabel: '分类代码',
+				enableKeyEvents:true,
+				allowBlank:false,
+				id:'code',
+				listeners: {
+					keyup:function(field,e){
+							field.setValue(field.getValue().toUpperCase());
+						}
+				}
+					},{
+				xtype:'hidden',
+                id: 'ali_cat_id'
+					},new Ext.form.TriggerField({
+					editable: false,
+					fieldLabel:'Aliexpress分类',
+					xtype:'trigger',
+					id:'ali_parent_name',
+					value:'请选择分类',
+					onSelect: function(record){
+					},
+					onTriggerClick: function() {
+						getAliCategoryFormTree('index.php?model=aliexpress&action=getcattree&com=0',1,afterselect1);
+					}
+					}),{
+                fieldLabel: '分类代码',
+				enableKeyEvents:true,
+				allowBlank:false,
+				id:'code',
+				listeners: {
+					keyup:function(field,e){
+							field.setValue(field.getValue().toUpperCase());
+						}
+				}
+					},{
+                fieldLabel: '分类名',
+                name: 'cat_name',
+				allowBlank:false
+					},{
+				xtype:'numberfield',
+                fieldLabel: '运费',
+                name: 'shipping_fee',
+				allowNegative:false,
+				decimalPercision:4,
+				value:0
+					},{
+				xtype:'numberfield',
+                fieldLabel: '包装费',
+                name: 'package_fee',
+				allowNegative:false,
+				decimalPercision:4,
+				value:0
+					},{
+				xtype:'numberfield',
+                fieldLabel: '申报价值',
+                name: 'Declared_value',
+				allowNegative:false,
+				decimalPercision:4,
+				value:0
+					},{
+					xtype:'hidden',
+					id:'parent_id',
+					value:0
+					}];
+		this.formitem = items;
+	},
+    createForm: function() {
+		var thiz = this.store;
+        var form = new Ext.form.FormPanel({
+            frame: true,
+            defaultType: 'textfield',
+            buttonAlign: 'center',
+            labelAlign: 'right',
+            labelWidth: 90,
+            trackResetOnLoad: true,
+            reader: new Ext.data.ArrayReader({
+                fields: this.fields
+            }),
+            items: this.formitem,
+            buttons: [{
+                text: 'submit',
+                handler: this.submitRecord.createDelegate(this)
+            }, {
+                text: 'reset',
+                handler: function() {
+                    form.getForm().reset();
+                }
+            }]
+        });
+        return form;
+    }
+});
+function afterselect1(k,v){
+	Ext.getCmp('ali_cat_id').setValue(k);
+	Ext.getCmp('ali_parent_name').setValue(v);
+}

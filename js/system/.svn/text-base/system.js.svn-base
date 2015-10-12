@@ -1,0 +1,848 @@
+Ext.ux.systemForm = Ext.extend(Ext.FormPanel, {
+	initComponent: function() {
+		this.frame = true,
+		this.autoHeight = true,
+		this.buttonAlign = 'center',
+		this.creatTab();
+		this.creatItems();
+		this.creatButtons();
+		this.tab.deferredRender = false;
+        Ext.ux.systemForm.superclass.initComponent.call(this);
+    },
+	creatTab:function(){
+		var info = this.info;
+		this.tab = new Ext.TabPanel({
+        activeTab: 0,
+		deferredRender:false,
+        defaults:{autoScroll: true,autoHeight:true},
+        items:[{
+			    id:'tab1',
+                title: '基本信息',
+				layout:'form',
+				height:600,
+				defaultType: 'textfield',
+				autoScroll:true,
+                items:[
+					   {
+                fieldLabel: '公司名称',
+                value: info.com_name,
+                name: 'com_name'
+				},{
+					fieldLabel: 'EUB标记发货',
+					xtype:'checkbox',
+					name:'CFG_EUB_MARK',
+					checked:info.CFG_EUB_MARK?true:false,
+					value:info.CFG_EUB_MARK
+				},{
+					fieldLabel: '无需Paypal校对',
+					xtype:'checkbox',
+					name:'CFG_CHECK_PAYPAL',
+					checked:info.CFG_CHECK_PAYPAL?true:false,
+					value:info.CFG_CHECK_PAYPAL
+				},{
+					fieldLabel: '加载Ebay转账订单',
+					xtype:'checkbox',
+					name:'CFG_CHECK_SIS',
+					checked:info.CFG_CHECK_SIS?true:false,
+					value:info.CFG_CHECK_SIS
+				},{
+					fieldLabel: '自动物流选择',
+					xtype:'checkbox',
+					name:'CFG_EXPRESS_RULE',
+					checked:info.CFG_EXPRESS_RULE?true:false,
+					value:info.CFG_EXPRESS_RULE
+				},{
+					fieldLabel: '自动库存判断',
+					xtype:'checkbox',
+					name:'CFG_GOODS_CHECK',
+					checked:info.CFG_GOODS_CHECK?true:false,
+					value:info.CFG_GOODS_CHECK
+				},{
+					fieldLabel: '自动组合分拆',
+					xtype:'checkbox',
+					name:'CFG_GOODS_SPLIT',
+					checked:info.CFG_GOODS_SPLIT?true:false,
+					value:info.CFG_GOODS_SPLIT
+				},{
+					fieldLabel: '配货校对产品',
+					xtype:'checkbox',
+					name:'CFG_GOODS_COLLATION',
+					checked:info.CFG_GOODS_COLLATION?true:false,
+					value:info.CFG_GOODS_COLLATION
+				},{
+					fieldLabel: '未锁定减库存',
+					xtype:'checkbox',
+					name:'CFG_REDUCE_QTY',
+					checked:info.CFG_REDUCE_QTY?true:false,
+					value:info.CFG_REDUCE_QTY
+				},{
+					fieldLabel: 'FBA仓库出库',
+					xtype:'checkbox',
+					name:'CFG_AUTO_FBA',
+					checked:info.CFG_AUTO_FBA?true:false,
+					value:info.CFG_AUTO_FBA
+				},{
+					fieldLabel: '不加载已发货订单',
+					xtype:'checkbox',
+					name:'CFG_IGONRE_ORDER',
+					checked:info.CFG_IGONRE_ORDER?true:false,
+					value:info.CFG_IGONRE_ORDER
+				},{
+					fieldLabel: '更新发货订单信息',
+					xtype:'checkbox',
+					name:'CFG_UPDATE_ORDER',
+					checked:info.CFG_UPDATE_ORDER?true:false,
+					value:info.CFG_UPDATE_ORDER
+				},{
+					fieldLabel: '多SKU支持',
+					xtype:'checkbox',
+					name:'CFG_OTHER_SKU',
+					checked:info.CFG_OTHER_SKU?true:false,
+					value:info.CFG_OTHER_SKU
+				},{
+					fieldLabel: '自动生成编码',
+					xtype:'checkbox',
+					name:'CFG_AUTOCREAT_SN',
+					checked:info.CFG_AUTOCREAT_SN?true:false,
+					value:info.CFG_AUTOCREAT_SN
+				},{
+					fieldLabel: '使用Paypal地址',
+					xtype:'checkbox',
+					name:'CFG_REPLACE_ADD',
+					checked:info.CFG_REPLACE_ADD?true:false,
+					value:info.CFG_REPLACE_ADD
+				},{
+					fieldLabel: '入库更新库存',
+					xtype:'checkbox',
+					name:'CFG_GOODS_UPDATEQTY',
+					checked:info.CFG_GOODS_UPDATEQTY?true:false,
+					value:info.CFG_GOODS_UPDATEQTY
+				},{
+					fieldLabel: '采购更新成本',
+					xtype:'checkbox',
+					name:'CFG_GOODS_UPDATECOST',
+					checked:info.CFG_GOODS_UPDATECOST?true:false,
+					value:info.CFG_GOODS_UPDATECOST
+				},{
+					fieldLabel: '启动产品序列号',
+					xtype:'checkbox',
+					name:'CFG_PRODUCTS_SN',
+					checked:info.CFG_PRODUCTS_SN?true:false,
+					value:info.CFG_PRODUCTS_SN
+				},{
+					fieldLabel: '默认币种',
+					name:'CFG_CURRENCY',
+					value:info.CFG_CURRENCY
+				},{
+					fieldLabel: '固定价计算公式',
+					name:'CFG_CAL_PRICE',
+					value:info.CFG_CAL_PRICE
+				},{
+					fieldLabel: '公式变量',
+					xtype:'displayfield',
+					value:'成本价:{$cost}<br>包装费:{$package_fee}<br>运费:{$shipping_fee}<br>汇率:{$rate}'
+				}]
+            },{
+				id:'tab2',
+                title: '单据相关',
+				layout:'form',
+				autoScroll:true,
+                defaultType: 'textfield',
+                items: [{
+					fieldLabel: '销售订单前缀',
+					name:'CFG_ORDER_PREFIX',
+					value:info.CFG_ORDER_PREFIX
+				},{
+					fieldLabel: '采购订单前缀',
+					name:'CFG_P_ORDER_PREFIX',
+					value:info.CFG_P_ORDER_PREFIX
+				},{
+					fieldLabel: '采购退货前缀',
+					name:'CFG_P_RETURN_PREFIX',
+					value:info.CFG_P_RETURN_PREFIX
+				},{
+					fieldLabel: '入库单前缀',
+					name:'CFG_IN_ORDER_PREFIX',
+					value:info.CFG_IN_ORDER_PREFIX
+				},{
+					fieldLabel: '出库单前缀',
+					name:'CFG_OUT_ORDER_PREFIX',
+					value:info.CFG_OUT_ORDER_PREFIX
+				},{
+					fieldLabel: '调拨单前缀',
+					name:'CFG_DB_ORDER_PREFIX',
+					value:info.CFG_DB_ORDER_PREFIX
+				},{
+					fieldLabel: '盘点单前缀',
+					name:'CFG_CHECK_ORDER_PREFIX',
+					value:info.CFG_CHECK_ORDER_PREFIX
+				},{
+					fieldLabel: 'RMA单前缀',
+					name:'CFG_RMA_ORDER_PREFIX',
+					value:info.CFG_RMA_ORDER_PREFIX
+				},{
+					fieldLabel: '退换货单前缀',
+					name:'CFG_RETURN_ORDER_PREFIX',
+					value:info.CFG_RETURN_ORDER_PREFIX
+				},{
+					fieldLabel: '付款单前缀',
+					name:'CFG_RF_ORDER_PREFIX',
+					value:info.CFG_RF_ORDER_PREFIX
+				},{
+					fieldLabel: '收款单前缀',
+					name:'CFG_GF_ORDER_PREFIX',
+					value:info.CFG_GF_ORDER_PREFIX
+				},{
+					fieldLabel: '费用单前缀',
+					name:'CFG_CF_ORDER_PREFIX',
+					value:info.CFG_CF_ORDER_PREFIX
+				},{
+					fieldLabel: 'sku无效前缀长度',
+					name:'CFG_PREFIX_GOODSSN',
+					value:info.CFG_PREFIX_GOODSSN,
+					xtype:'numberfield',
+					maxValue:6,
+					allowNegative:false,
+					allowDecimals:false
+				},{
+					fieldLabel: 'SKU无效分隔符',
+					name:'CFG_GOODSSN_SPLIT',
+					value:info.CFG_GOODSSN_SPLIT
+				},{
+					xtype: 'compositefield',
+					fieldLabel: '强制SKU长度',
+					items: [
+						{
+							fieldLabel: 'SKU长度',
+							name:'CFG_GOODSSN_LENGTH',
+							value:info.CFG_GOODSSN_LENGTH,
+							xtype:'numberfield',
+							allowNegative:false,
+							allowDecimals:false,
+							allowBlank:false
+						},{
+							xtype:'checkbox',
+							name:'CFG_GOODSSN_AUTOLENGTH',
+							checked:info.CFG_GOODSSN_AUTOLENGTH?true:false,
+							value:info.CFG_GOODSSN_AUTOLENGTH
+						}
+					]
+				},{
+					xtype: 'compositefield',
+					fieldLabel: '组合SKU分拆',
+					items: [
+						{
+							xtype:'checkbox',
+							name:'CFG_GOODS_COMBSPLIT',
+							checked:info.CFG_GOODS_COMBSPLIT?true:false,
+							value:info.CFG_GOODS_COMBSPLIT
+						},{
+							xtype:'displayfield',
+							value:'组合连接符号:'
+						},{
+							xtype: 'textfield',
+							name:'CFG_GOODS_CONCAT',
+							width:30,
+							value:info.CFG_GOODS_CONCAT
+						},{
+							xtype:'displayfield',
+							value:'数量连接符号:'
+						},{
+							xtype: 'textfield',
+							name:'CFG_GOODS_QTYSIGN',
+							width:30,
+							value:info.CFG_GOODS_QTYSIGN
+						}
+					]
+				},{
+					fieldLabel: '持续采购产品状态',
+					name:'CFG_GOODS_STATUS',
+					value:info.CFG_GOODS_STATUS
+				},{
+					fieldLabel: '采购日均销量周期',
+					name:'CFG_SALES_CIRCLE',
+					value:info.CFG_SALES_CIRCLE,
+					xtype:'numberfield',
+					allowNegative:false,
+					allowDecimals:false
+				},{
+					fieldLabel: '采购排除批发',
+					name:'CFG_WHOLE_SALE',
+					value:info.CFG_WHOLE_SALE,
+					xtype:'numberfield',
+					allowNegative:false,
+					allowDecimals:false
+				},{
+					fieldLabel: '业务提成代码长度',
+					name:'CFG_GOODSSN_PREFIX',
+					value:info.CFG_GOODSSN_PREFIX,
+					xtype:'numberfield',
+					allowNegative:false,
+					allowDecimals:false,
+					allowBlank:false
+				}]
+            },{
+				id:'tab3',
+                title: '报关信息',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+					fieldLabel: '报关英文简称',
+					name:'CFG_DEC_NAME',
+					value:info.CFG_DEC_NAME
+				},{
+					fieldLabel: '报关中文简称',
+					name:'CFG_DEC_NAME_CN',
+					value:info.CFG_DEC_NAME_CN
+				},{
+					fieldLabel: '默认申报价值',
+					name:'CFG_DECLARED_VALUE',
+					value:info.CFG_DECLARED_VALUE,
+					allowNegative:false,
+					allowDecimals:false
+				},{
+					fieldLabel: '申报重量(kg)',
+					name:'CFG_DECLARED_WEIGHT',
+					value:info.CFG_DECLARED_WEIGHT,
+					allowNegative:false,
+					allowDecimals:false
+				},{
+					fieldLabel: '订单申报上限',
+					name:'CFG_DECLARED_MAX',
+					value:info.CFG_DECLARED_MAX,
+					allowNegative:false,
+					allowDecimals:false
+				}]
+			},{
+				id:'tab4',
+                title: '物流接口信息',
+                layout:'form',
+                items: [
+				{
+                layout:'column',
+				xtype:'panel',
+				style:'margin-top:20px;',
+                items:[{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'快递公司信息',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+					fieldLabel: '4PXtoken',
+					name:'CFG_4PX_TOKEN',
+					value:info.CFG_4PX_TOKEN
+				},{
+					fieldLabel: '小包要求退回',
+					xtype:'checkbox',
+					name:'CFG_RETURN_4PX',
+					checked:info.CFG_RETURN_4PX?true:false,
+					value:info.CFG_RETURN_4PX
+				},{
+					fieldLabel: '启用4PX接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_4PX',
+					checked:info.CFG_ENABLE_4PX?true:false,
+					value:info.CFG_ENABLE_4PX
+				}]},{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'美国仓接口',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+					fieldLabel: '网址',
+					name:'CFG_COOL_URL',
+					value:info.CFG_COOL_URL
+					},{
+						fieldLabel: 'API',
+						name:'CFG_COOL_TOKEN',
+						value:info.CFG_COOL_TOKEN
+					},{
+					fieldLabel: '启用美仓接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_COOL',
+					checked:info.CFG_ENABLE_COOL?true:false,
+					value:info.CFG_ENABLE_COOL
+				}]},{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'英国仓接口',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+					fieldLabel: '网址',
+					name:'CFG_BIRD_URL',
+					value:info.CFG_BIRD_URL
+					},{
+						fieldLabel: 'API',
+						name:'CFG_BIRD_TOKEN',
+						value:info.CFG_BIRD_TOKEN
+					},{
+					fieldLabel: '启用英仓接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_BIRD',
+					checked:info.CFG_ENABLE_BIRD?true:false,
+					value:info.CFG_ENABLE_BIRD
+					}]}]
+				},
+				{
+                layout:'column',
+				xtype:'panel',
+				style:'margin-top:20px;',
+                items:[{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'三态接口',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+						fieldLabel: 'UserId',
+						name:'CFG_SFC_ID',
+						value:info.CFG_SFC_ID
+					},{
+						fieldLabel: 'APIkey',
+						name:'CFG_SFC_KEY',
+						value:info.CFG_SFC_KEY
+					},{
+						fieldLabel: 'TOKEN',
+						name:'CFG_SFC_TOKEN',
+						value:info.CFG_SFC_TOKEN
+					},{
+					fieldLabel: '启用三态接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_SFC',
+					checked:info.CFG_ENABLE_SFC?true:false,
+					value:info.CFG_ENABLE_SFC
+					}]},{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'线下EUB接口',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+						fieldLabel: '校验码',
+						name:'CFG_EUB_TOKEN',
+						value:info.CFG_EUB_TOKEN
+					},{
+					fieldLabel: '启用线下EUB接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_EUB',
+					checked:info.CFG_ENABLE_EUB?true:false,
+					value:info.CFG_ENABLE_EUB
+					}]},{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'德国DHL接口',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+					fieldLabel: 'User',
+					name:'CFG_DEDHL_ID',
+					value:info.CFG_DEDHL_ID
+					},{
+					fieldLabel: 'EKP',
+					name:'CFG_DEDHL_EKP',
+					value:info.CFG_DEDHL_EKP
+					},{
+						fieldLabel: 'Signature',
+						name:'CFG_DEDHL_KEY',
+						value:info.CFG_DEDHL_KEY
+					},{
+					fieldLabel: '启用德国接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_DEDHL',
+					checked:info.CFG_ENABLE_DEDHL?true:false,
+					value:info.CFG_ENABLE_DEDHL
+					}]}]
+				},
+				{
+                layout:'column',
+				xtype:'panel',
+				style:'margin-top:20px;',
+                items:[{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'出口易接口',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+						fieldLabel: 'APIkey',
+						name:'CFG_CK1_KEY',
+						value:info.CFG_CK1_KEY
+					},{
+						fieldLabel: 'TOKEN',
+						name:'CFG_CK1_TOKEN',
+						value:info.CFG_CK1_TOKEN
+					},{
+					fieldLabel: '启用出口易接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_CK1',
+					checked:info.CFG_ENABLE_CK1?true:false,
+					value:info.CFG_ENABLE_CK1
+					}]},{
+					columnWidth:.3,
+					layout:'form',
+					xtype:'fieldset',
+					title:'易通关接口',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+						fieldLabel: 'companyID',
+						name:'CFG_YTG_ID',
+						value:info.CFG_YTG_ID
+					},{
+						fieldLabel: 'pwd',
+						name:'CFG_YTG_KEY',
+						value:info.CFG_YTG_KEY
+					},{
+					fieldLabel: '启用易通关接口',
+					xtype:'checkbox',
+					name:'CFG_ENABLE_YTG',
+					checked:info.CFG_ENABLE_YTG?true:false,
+					value:info.CFG_ENABLE_YTG
+					}]}]
+				},
+				{
+                layout:'column',
+				xtype:'panel',
+				style:'margin-top:20px;',
+                items:[
+					{
+					columnWidth:.33,
+					layout:'form',
+					xtype:'fieldset',
+					title:'揽件信息(中文)',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+					xtype:'displayfield',
+					value:'<font color=red>揽件地址中省市区必须填写页面下方对应的编码</font>'
+					},{
+					fieldLabel: 'Email',
+					name:'EUB_Email',
+					vtype:'email',
+					value:info.EUB_Email
+				},{
+					fieldLabel: '公司名',
+					name:'EUB_Company',
+					value:info.EUB_Company
+				},{
+					fieldLabel: '国家',
+					name:'EUB_Country',
+					value:info.EUB_Country
+				},{
+					fieldLabel: '省份',
+					name:'EUB_Province',
+					xtype:'numberfield',
+					value:info.EUB_Province
+				},{
+					fieldLabel: '城市',
+					name:'EUB_City',
+					xtype:'numberfield',
+					value:info.EUB_City
+				},{
+					fieldLabel: '区',
+					name:'EUB_District',
+					xtype:'numberfield',
+					value:info.EUB_District
+				},{
+					fieldLabel: '街',
+					name:'EUB_Street',
+					value:info.EUB_Street
+				},{
+					fieldLabel: '邮编',
+					name:'EUB_Postcode',
+					value:info.EUB_Postcode
+				},{
+					fieldLabel: '联系人',
+					name:'EUB_Contact',
+					value:info.EUB_Contact
+				},{
+					fieldLabel: '手机',
+					name:'EUB_Mobile',
+					value:info.EUB_Mobile
+				},{
+					fieldLabel: '电话',
+					name:'EUB_Phone',
+					value:info.EUB_Phone
+				}]
+					},{
+					columnWidth:.33,
+					layout:'form',
+					xtype:'fieldset',
+					title:'寄件信息(英文)',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+					fieldLabel: 'Email',
+					name:'EUB_EN_Email',
+					vtype:'email',
+					value:info.EUB_EN_Email
+				},{
+					fieldLabel: 'Company',
+					name:'EUB_EN_Company',
+					value:info.EUB_EN_Company
+				},{
+					fieldLabel: 'Country',
+					name:'EUB_EN_Country',
+					readOnly:true,
+					value:'CHINA'
+				},{
+					fieldLabel: 'Province',
+					name:'EUB_EN_Province',
+					value:info.EUB_EN_Province
+				},{
+					fieldLabel: 'City',
+					name:'EUB_EN_City',
+					value:info.EUB_EN_City
+				},{
+					fieldLabel: 'District',
+					name:'EUB_EN_District',
+					value:info.EUB_EN_District
+				},{
+					fieldLabel: 'Street',
+					name:'EUB_EN_Street',
+					value:info.EUB_EN_Street
+				},{
+					fieldLabel: 'Postcode',
+					name:'EUB_EN_Postcode',
+					value:info.EUB_EN_Postcode
+				},{
+					fieldLabel: 'Contact',
+					name:'EUB_EN_Contact',
+					value:info.EUB_EN_Contact
+				},{
+					fieldLabel: 'Mobile',
+					name:'EUB_EN_Mobile',
+					value:info.EUB_EN_Mobile
+				},{
+					fieldLabel: 'Phone',
+					name:'EUB_EN_Phone',
+					value:info.EUB_EN_Phone
+				}]
+					},{
+					columnWidth:.33,
+					layout:'form',
+					xtype:'fieldset',
+					title:'退件信息(要求编码格式且与寄件地址一直必须中文)',
+					style:'margin:10px 20px',
+					defaultType: 'textfield',
+					width:300,
+					autoHeight:true,
+					items:[{
+					fieldLabel: 'Email',
+					name:'EUB_CN_Email',
+					vtype:'email',
+					value:info.EUB_CN_Email
+				},{
+					fieldLabel: 'Company',
+					name:'EUB_CN_Company',
+					value:info.EUB_CN_Company
+				},{
+					fieldLabel: 'Country',
+					name:'EUB_CN_Country',
+					readOnly:true,
+					value:'中国'
+				},{
+					fieldLabel: 'Province',
+					name:'EUB_CN_Province',
+					value:info.EUB_CN_Province
+				},{
+					fieldLabel: 'City',
+					name:'EUB_CN_City',
+					value:info.EUB_CN_City
+				},{
+					fieldLabel: 'District',
+					name:'EUB_CN_District',
+					value:info.EUB_CN_District
+				},{
+					fieldLabel: 'Street',
+					name:'EUB_CN_Street',
+					value:info.EUB_CN_Street
+				},{
+					fieldLabel: 'Postcode',
+					name:'EUB_CN_Postcode',
+					value:info.EUB_CN_Postcode
+				},{
+					fieldLabel: 'Contact',
+					name:'EUB_CN_Contact',
+					value:info.EUB_CN_Contact
+				},{
+					fieldLabel: 'Mobile',
+					name:'EUB_CN_Mobile',
+					value:info.EUB_CN_Mobile
+				},{
+					fieldLabel: 'Phone',
+					name:'EUB_CN_Phone',
+					value:info.EUB_CN_Phone
+				}]
+					}
+			]}]
+			},{
+				id:'tab5',
+                title: '邮件服务器',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+					fieldLabel: 'SMTP服务器',
+					name:'CFG_EMAIL_HOST',
+					value:info.CFG_EMAIL_HOST
+				},{
+					fieldLabel: '端口',
+					name:'CFG_EMAIL_PORT',
+					value:info.CFG_EMAIL_PORT
+				},{
+					fieldLabel: '用户名',
+					name:'CFG_EMAIL_USER',
+					value:info.CFG_EMAIL_USER
+				},{
+					fieldLabel: '密码',
+					name:'CFG_EMAIL_PASS',
+					value:info.CFG_EMAIL_PASS
+				},{
+					fieldLabel: '发件人',
+					name:'CFG_EMAIL_FROM',
+					value:info.CFG_EMAIL_FROM
+				},{
+					fieldLabel: '回邮地址',
+					name:'CFG_EMAIL_REPLY',
+					value:info.CFG_EMAIL_REPLY
+				}]
+			},{
+				id:'tab6',
+                title: '订单处理流程',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+					fieldLabel: '客服审核',
+					name:'CFG_ORDER_1',
+					value:info.CFG_ORDER_1
+				},{
+					fieldLabel: '库管审核',
+					name:'CFG_ORDER_2',
+					value:info.CFG_ORDER_2
+				},{
+					fieldLabel: '库管缺货EUB',
+					name:'CFG_ORDER_13',
+					value:info.CFG_ORDER_13
+				},{
+					fieldLabel: '订单审批',
+					name:'CFG_ORDER_14',
+					value:info.CFG_ORDER_14
+				},{
+					fieldLabel: '订单处理',
+					name:'CFG_ORDER_3',
+					value:info.CFG_ORDER_3
+				},{
+					fieldLabel: '订单配货校对',
+					name:'CFG_ORDER_4',
+					value:info.CFG_ORDER_4
+				},{
+					fieldLabel: '出库开单',
+					name:'CFG_ORDER_5',
+					value:info.CFG_ORDER_5
+				},{
+					fieldLabel: '标记发货',
+					name:'CFG_ORDER_6',
+					value:info.CFG_ORDER_6
+				},{
+					fieldLabel: '拣货订单',
+					name:'CFG_ORDER_8',
+					value:info.CFG_ORDER_8
+				},{
+					fieldLabel: '缺货订单',
+					name:'CFG_ORDER_9',
+					value:info.CFG_ORDER_9
+				},{
+					fieldLabel: '退款订单',
+					name:'CFG_ORDER_10',
+					value:info.CFG_ORDER_10
+				},{
+					fieldLabel: '到付收款订单',
+					name:'CFG_ORDER_11',
+					value:info.CFG_ORDER_11
+				},{
+					fieldLabel: '导入订单状态',
+					name:'CFG_ORDER_12',
+					value:info.CFG_ORDER_12
+				},{
+					fieldLabel: '锁定库存步骤',
+					name:'CFG_ORDER_15',
+					value:info.CFG_ORDER_15
+				},{
+					fieldLabel: '快递规则步骤',
+					name:'CFG_ORDER_16',
+					value:info.CFG_ORDER_16
+				}]
+			}
+			]
+		});		
+	},
+
+
+	creatItems:function(){
+		this.items = [this.tab];
+	},
+
+	creatButtons:function(){
+		this.buttons = [{
+				text: '保存',
+				type: 'submit', 
+				handler:this.formsubmit.createDelegate(this)
+			},{
+					text: '取消',
+					handler:this.formreset.createDelegate(this)
+			}];		
+	},
+
+	formsubmit:function(){
+		if(this.getForm().isValid()){
+				this.getForm().submit({
+					url:this.saveURL,
+					waitMsg: '正在更新系统配置',
+					params:'',
+					method:'post',
+					success:function(form,action){
+							Ext.example.msg('操作','保存成功!');
+							 },
+					failure:function(form,action){
+							Ext.example.msg('操作','服务器出现错误请稍后再试！');
+					}
+				});
+		}else{
+			Ext.example.msg('ERROR','请正确完成表单内容');
+			}
+	},
+
+	formreset:function(){//表单重置
+		this.form.reset();
+	}
+});

@@ -1,0 +1,217 @@
+<style type="text/css">
+<!--
+@media print
+{
+.noprint { display: none } 
+.STYLE1 {
+	font-family: C39HrP24DhTt;
+	font-size: 40px;
+}
+.pagebreak{
+page-break-after:always;
+clear:both;
+}
+li{
+list-style:none;
+}
+}
+.STYLE1 {
+	font-family: C39HrP24DhTt;
+	font-size: 40px;
+}
+.pagebreak{
+page-break-after:always;
+clear:both;
+}
+li{
+list-style:none;
+}
+-->
+</style>
+<OBJECT classid=CLSID:8856F961-340A-11D0-A96B-00C04FD705A2 height=10 id=WB width=10></OBJECT> 
+<script language="JavaScript">
+function doPrintSetup(){ 
+//打印设置 
+WB.ExecWB(8,1) 
+} 
+function doPrintPreview(){ 
+//打印预览 
+	try{
+		WB.ExecWB(7,1);
+	}catch(e){
+		var errorMsg = e.message+"\r"+"请设置:IE选项->安全->Internet->"+"ActiveX控件和插件"+"\r"+"对未标记为可安全执行脚本的ActiveX的控件初始化并执行脚本->允许/提示";
+		alert(errorMsg);
+		return;
+	}
+} 
+function doprint(){ 
+//直接打印
+	try{ 
+	WB.ExecWB(6,6)
+	}catch(e){
+	window.print();
+	} 
+}
+</script>
+<div class=noprint> 
+  <div align="center">
+  <input id="idPrint1" type="button" value="打印本页" 
+onclick="doprint();">
+  <input id="idPrint3" type="button" value="打印预览" 
+onclick="doPrintPreview();">
+	</div>
+</div> 
+<!--{if $type eq 1}--><!-打印地址->
+<!--{foreach from =$orders item = order name=orderitem}-->
+<div <!--{if $smarty.foreach.orderitem.last}--><!--{else}-->class="pagebreak"<!--{/if}-->>
+<ul>
+<li><b>TO:</b><!--{$order.consignee}--></li>
+<li><!--{$order.street1}-->  <!--{$order.street2}--></li>
+<li><!--{$order.city}-->,<!--{$order.state}-->,<!--{$order.zipcode}--></li>
+<li><!--{$order.country}--></li>
+<li><!--{$order.tel}--></li>
+<li><span class="STYLE1">*<!--{$order.order_sn}-->*</span></li>				
+</ul>
+</div>
+<!--{/foreach}-->
+<!--{elseif $type eq 2}--><!-打印拣货信息->
+<!--{foreach from =$orders item = order name=orderitem}-->
+<div <!--{if $smarty.foreach.orderitem.last}--><!--{else}-->class="pagebreak"<!--{/if}-->>
+<ul>
+<li><span class="STYLE1">*<!--{$order.order_sn}-->*</span></li>
+<li>配货信息:</li>
+<li><!--{$order.goods}--></li>
+<!--{if $order.pay_note}--><li>备注:<!--{$order.pay_note}--></li><!--{/if}-->
+</ul>
+</div>
+<!--{/foreach}-->
+<!--{elseif $type eq 3}--><!-打印invoice->
+<!--{foreach from =$orders item = order name=orderitem}-->
+<div <!--{if $smarty.foreach.orderitem.last}--><!--{else}-->class="pagebreak"<!--{/if}-->>
+<table width="792" height="938" border="1" cellpadding="0" cellspacing="0" bordercolor="#000000">
+  <tr height="33">
+    <td height="33" colspan="9"><div align="center">
+      <h1><strong>Commercial Invoice<br />
+        商 业 发 票</strong></h1>
+    </div></td>
+  </tr>
+  
+  <tr height="18">
+    <td height="50" colspan="4" bgcolor="#FFFF00"><strong>International    Air Waybill No:<br />
+    航空运单：</strong></td>
+    <td colspan="5"><strong>Date of Exportation:<br />
+    出口日期：</strong><!--{$today}--></td>
+  </tr>
+  
+  <tr height="19">
+    <td colspan="4" height="50"><strong>Shipper/Exportation(complete    name and address)<br />
+    寄件人:</strong></td>
+    <td colspan="5" bgcolor="#FFFF00"><strong>Consignee(Complete    name and address)<br />
+  收件人：</strong><!--{$order.consignee}--> </td>
+  </tr>
+  
+  <tr height="180">
+    <td height="168" colspan="4" valign="top"><strong>From:</strong></td>
+    <td colspan="5" valign="top" bgcolor="#FFFF00"><strong>To:</strong><br />
+<!--{$order.consignee}--><br><!--{$order.street1}-->  <!--{$order.street2}--><br><!--{$order.city}-->,<!--{$order.state}-->,<!--{$order.zipcode}--><br><br><!--{$order.country}--></td>
+  </tr>
+  <tr height="54">
+    <td width="50" height="54"><div align="center"><strong>Phone:</strong></div></td>
+    <td colspan="3">　</td>
+    <td colspan="2"><div align="center"><strong>Phone:</strong></div></td>
+    <td colspan="3" bgcolor="#FFFF00"><!--{$order.tel}--></td>
+  </tr>
+  <tr height="50">
+    <td colspan="4" height="41"><strong>Country of Export<br />
+    出口国：</strong></td>
+    <td colspan="5" bgcolor="#FFFF00"><strong>Country of destination<br />
+  进口国：</strong>   <!--{$order.country}--></td>
+  </tr>
+  <tr height="38">
+    <td height="42"><strong>No.of Pkgs</strong></td>
+    <td width="53"><strong>Weight</strong></td>
+    <td width="54"><strong>Cubage</strong></td>
+    <td colspan="2"><strong>Description of Goods</strong></td>
+    <td width="65"><strong>QTY</strong></td>
+    <td width="91"><strong>Unit Value</strong></td>
+    <td width="182" colspan="2"><strong>Total Value</strong></td>
+  </tr>
+  <tr height="31">
+    <td height="21"><span class="STYLE2">件数</span></td>
+    <td height="21"><span class="STYLE2">重量</span></td>
+    <td height="21"><span class="STYLE2">体积重</span></td>
+    <td height="21" colspan="2"><span class="STYLE2">货物描述</span></td>
+    <td height="21"><span class="STYLE2">数量</span></td>
+    <td height="21"><span class="STYLE2">单价</span></td>
+    <td colspan="2"><span class="STYLE2">总价</span></td>
+  </tr>
+	<!--{foreach from =$order.goodsarr item = goods name=goodsitem}-->
+  <tr height="42">
+    <td height="36"></td>
+    <td>　</td>
+    <td>　</td>
+    <td colspan="2"><!--{$goods.goods_name}--></td>
+    <td><!--{$goods.goods_qty}--></td>
+    <td>$<!--{$goods.goods_price}--> </td>
+    <td colspan="2">$<!--{$goods.goods_price*$goods.goods_qty}--></td>
+  </tr>
+  <!--{/foreach}-->
+  <tr height="30">
+    <td colspan="3" height="59"><strong>Total No. of pkgs</strong></td>
+    <td width="235">  </td>
+    <td colspan="2"><div align="center"><strong>Total    Inv.Value</strong></div></td>
+    <td colspan="3">$  </td>
+  </tr>
+  
+  <tr>
+    <td height="21" colspan="9"><p><strong>Reason for Export：<br />
+      </strong></p>    </td>
+  </tr>
+  <tr height="18">
+    <td colspan="9"><p><strong>Shipping Details:</strong> <br />
+      We certify and pledge that all information filled in this document is   conformed to the details declared to the Customs and conformed to the   actual conditions of the goods in the shipment.</p>
+      <p><br />
+      </p></td>
+  </tr>
+  
+  <tr height="19">
+    <td colspan="5" height="19"><div align="center" class="STYLE1"><strong>Shipper's    Signature&amp;Stamp</strong></div></td>
+    <td colspan="4"><div align="center"><strong>Date</strong></div></td>
+  </tr>
+  <tr height="19">
+    <td colspan="5" height="19"><div align="center" class="STYLE1"><strong>发件人签字，盖章</strong></div></td>
+    <td colspan="4"><div align="center"><strong>签字日期</strong></div></td>
+  </tr>
+   <tr height="19">
+    <td height="115" colspan="5" valign="bottom"><div align="center">----------------------------------</div></td>
+    <td colspan="4" valign="bottom"><div align="center">--------------------------------</div></td>
+  </tr>
+</table>
+</div>
+<!--{/foreach}-->
+<!--{elseif $type eq 4}-->
+<!--{foreach from =$orders item = order name=orderitem}-->
+<div style="width:600px" <!--{if $smarty.foreach.orderitem.last}--><!--{else}-->class="pagebreak"<!--{/if}-->>
+<div style="width:50%;float:left;margin:0;padding:0">
+<ul>
+<li><b>TO:</b><!--{$order.consignee}--></li>
+<li><!--{$order.street1}-->  <!--{$order.street2}--></li>
+<li><!--{$order.city}-->,<!--{$order.state}-->,<!--{$order.zipcode}--></li>
+<li><!--{$order.country}--></li>
+<li><!--{$order.tel}--></li>				
+</ul>
+</div>
+<div style="width:50%;float:left;margin:0;padding:0">
+<ul>
+<li><span class="STYLE1">*<!--{$order.order_sn}-->*</span></li>
+<li>配货信息:</li>
+<li><!--{foreach from =$order.goodsarr item = goods name=goodsitem}}-->
+<!--{$goods.goods_sn}-->&&<!--{$goods.goods_qty}--><br>
+<!--{/foreach}-->
+</li>
+<!--{if $order.pay_note}--><li>备注:<!--{$order.pay_note}--></li><!--{/if}-->
+</ul>
+</div>
+</div>
+<!--{/foreach}-->
+<!--{/if}-->

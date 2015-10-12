@@ -1,0 +1,594 @@
+Ext.ux.goodsForm = Ext.extend(Ext.FormPanel, {
+	initComponent: function() {
+		this.frame = true,
+		this.fileUpload = true,
+		this.autoHeight = true,
+		this.buttonAlign = 'center',
+		this.creatChildGridcm();
+		this.creatChildGoodsstore();
+		this.creatChildGoodsgrid();
+		this.getTab();
+		this.creatItems();
+		this.creatButtons();
+        Ext.ux.goodsForm.superclass.initComponent.call(this);
+    },
+	creatChildGoodsstore:function(){//子产品明细store
+		this.childgoodsstore = new Ext.data.Store({
+			url : this.listURL,
+			pruneModifiedRecords:true,
+			reader : new Ext.data.JsonReader({
+				totalProperty : 'totalCount',
+				root : 'topics',
+				id:'rec_id'
+			}, ['child_sn','color','size','price','stock'])
+			});
+	},	
+
+	creatChildGridcm:function(){
+		var thiz =this;
+		this.childcmlist = new Ext.grid.ColumnModel([{
+						header : '子产品编码<font color=red>*</font>',
+						dataIndex:'child_sn',
+						width:100,
+						align : 'left',
+						editor:new Ext.form.TextField({
+								allowBlank:false,
+								hideLabel:true
+						})
+					}, {
+						header:'颜色',
+						width:150,
+						dataIndex:'color',
+						align:'left',
+						renderer: this.rendererlist[1],
+						editor:this.combolist[1]
+					}, {
+						header:'尺寸',
+						width:150,
+						dataIndex:'size',
+						align:'left',
+						renderer:  this.rendererlist[0],
+						editor:this.combolist[0]
+					}, {
+						header:'价格<font color=red>*</font>',
+						width:150,
+						dataIndex:'price',
+						align:'left',
+						editor:new Ext.form.NumberField({
+								allowNegative:false,
+								hideLabel:true
+						})
+					}, {
+						header:'库存数量<font color=red>*</font>',
+						dataIndex:'stock',
+						align:'right',
+						editor:new Ext.form.NumberField({
+							allowBlank:false,
+							allowNegative:false,
+							allowDecimals:false,
+							style:'text-align:left'
+						})
+					}]);
+	},	
+
+	creatChildGoodsgrid:function(){//创建子产品明细
+		this.childgoodsGrid =new Ext.grid.EditorGridPanel({
+					frame:true,
+					title:'子产品明细',
+					height : 300,
+					autoWidth : true,
+					cm : this.childcmlist,
+					ds : this.childgoodsstore,
+					sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+					clicksToEdit : 1,
+					stripeRows : true, // 让基数行和偶数行的颜色不一样
+					viewConfig : {
+						forceFit : true
+					},
+					iconCls : 'icon-grid',
+					tbar : new Ext.Toolbar({
+						items : [{
+							xtype:'button',
+							text:'新增子产品',
+							id: 'childaddBtn',
+							disabled:true,
+							iconCls: 'x-tbar-add',
+							handler:this.addChilditem.createDelegate(this)
+						},{
+							text: '删除',
+							iconCls: 'x-tbar-del',
+							id: 'childremoveBtn',
+							handler: this.removeChildItem.createDelegate(this),
+							disabled:true
+						}]
+					})
+				});
+	},
+	afterselect:function(k,v)
+	{
+		Ext.getCmp('cat_name').setValue(v);
+		Ext.getCmp('cat_id').setValue(k);
+					Ext.getBody().mask("正在获取数据.请稍等...","x-mask-loading");
+					Ext.Ajax.request({
+					   url: 'index.php?model=goods&action=getgoodscode',
+					   loadMask:true,
+					   params: { cat_id: k },
+						success:function(response,opts){
+							var res = Ext.decode(response.responseText);
+							Ext.getBody().unmask();
+								if(res.success){
+								if(res.msg) Ext.getCmp('goods_sn').setValue(res.msg);
+								}else{
+								Ext.Msg.alert('ERROR',res.msg);
+								}						
+							}
+						});
+	},
+	creatTab:function(){
+		var afterselect = this.afterselect;
+		var goodsgrid = this.goodsGrid;
+		var tab = new Ext.TabPanel({
+        activeTab: 0,
+        defaults:{autoScroll: true,autoHeight:true},
+        items:[{
+			    id:'tab1',
+                title: '基本信息',
+				layout:'form',
+				height:600,
+				autoScroll:true,
+                items:[
+					   {
+						   layout:'column',
+						   items:[
+									{
+									columnWidth:.33,
+									layout: 'form',
+									defaultType: 'textfield',
+									items:[{fieldLabel: '产品编码',id:'goods_sn'},
+										   {fieldLabel: '产品名称',id:'goods_name',allowBlank:false},
+										   {
+												xtype:'combo',
+												store: new Ext.data.SimpleStore({
+													 fields: ["id", "key_type"],
+													 data: this.goods_data[0]
+												}),
+												valueField :"id",
+												displayField: "key_type",
+												mode: 'local',
+												width:130,
+												editable: false,
+												forceSelection: true,
+												triggerAction: 'all',
+												hiddenName:'status',
+												name: 'status',
+												allowBlank:false,
+											   fieldLabel: '产品状态',
+											   value:1,
+											   id:'status_id'
+											},{
+											   fieldLabel: '长',
+											   id:'l'
+										   	},{
+											   fieldLabel: '报关名英文',
+											   id:'dec_name'
+										   	},{
+											   fieldLabel: '报关名中文',
+											   id:'dec_name_cn'
+											 },{
+											   fieldLabel: '申报价值',
+											   id:'Declared_value',
+											   xtype:'numberfield',
+											   allowNegative:false
+											},{
+											   fieldLabel: '申报重量kg',
+											   id:'Declared_weight',
+											   xtype:'numberfield',
+											   allowNegative:false
+											}
+										   ]
+									},{
+									columnWidth:.33,
+									layout: 'form',
+									defaultType: 'textfield',
+									items:[{
+											    xtype:'combo',
+												store: new Ext.data.SimpleStore({
+													 fields: ["id", "key_type"],
+													 data: this.goods_data[2]
+												}),
+												valueField :"id",
+												displayField: "key_type",
+												mode: 'local',
+												width:130,
+												editable: false,
+												forceSelection: true,
+												triggerAction: 'all',
+												hiddenName:'brand_id',
+												name: 'brand',
+												allowBlank:false,
+										   		fieldLabel: '品牌'
+												},
+										   {fieldLabel: 'SKU',id:'SKU'},
+										   {
+											   fieldLabel: '保质期',
+											   id:'keeptime',
+											   format:'Y-m-d',
+											   value:'2037-12-31',
+											   xtype:'datefield'
+										   },{
+											   fieldLabel: '宽',
+											   id:'w'
+										   	},{
+											   fieldLabel: '管理库存',
+											   xtype:'checkbox',
+											   name:'is_control',
+											   checked:true,
+											   value:1
+										   },{
+											   fieldLabel: '有无子产品',
+											   xtype:'checkbox',
+											   name:'has_child',
+											   checked:false,
+											   value:0,
+											   listeners:{
+												   'check':function(){
+													  Ext.getCmp('childaddBtn').setDisabled(!this.checked);
+													   }
+												   }
+											 },{
+											   fieldLabel: '自编码',
+											   id:'code'
+											},{
+											   fieldLabel: 'UPC',
+											   id:'upc'
+											}
+										   ]
+									},{
+									columnWidth:.33,
+									layout: 'form',
+									defaultType: 'textfield',
+									items:[new Ext.form.TriggerField({
+											editable: false,
+											fieldLabel:'所属分类',
+											xtype:'trigger',
+											id:'cat_name',
+											onSelect: function(record){
+											},
+											onTriggerClick: function() {
+												getCategoryFormTree('index.php?model=goods&action=getcattree&com=0',0,afterselect);
+											}
+											}),{xtype:'hidden',id:'cat_id'},
+										   {fieldLabel: '产品链接',id:'goods_url'},
+										   {
+											   fieldLabel: '更新图片',
+											   inputType: 'file',
+											   xtype: 'textfield',
+											   name:'photo_path',
+										       id:'new_img'
+											},{
+											   fieldLabel: '高',
+											   id:'h'
+										   	},{
+											   fieldLabel: '净重',
+											   id:'grossweight'
+										   	},
+										   {
+											   fieldLabel: '重量',
+											   id:'weight',
+											   value:0,
+											   allowBlank:false
+											},{
+											   fieldLabel: '管理序列号',
+											   xtype:'checkbox',
+											   id:'sn_control',
+											   checked:false,
+											   value:0
+											 },{
+											   fieldLabel: '组合产品',
+											   xtype:'checkbox',
+											   id:'is_group',
+											   checked:false,
+											   disabled : true
+											 }
+										   ]
+									}
+								]
+						},
+						{
+						fieldLabel: '备注',
+						id:'comment',
+						width:600,
+						height:30,
+						xtype:'textarea'
+						},this.childgoodsGrid]
+            },{
+				id:'tab2',
+                title: '费用相关',
+				layout:'form',
+				autoScroll:true,
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: '成本价',
+					width:200,
+                    name: 'cost',
+					value:0,
+					xtype:'numberfield'
+                },{
+                    fieldLabel: '价格1',
+					width:200,
+                    name: 'price1',
+					xtype:'numberfield'
+                },{
+                    fieldLabel: '价格2',
+					width:200,
+                    name: 'price2',
+					xtype:'numberfield'
+                },{
+                    fieldLabel: '价格3',
+					width:200,
+                    name: 'price3',
+					xtype:'numberfield'
+                }]
+            },{
+				id:'tab3',
+                title: '中国刊登',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Grade_CN',
+					width:200,
+                    name: 'Grade_cn',
+					tabTip:'test'
+                },{
+                    fieldLabel: 'Plan_cn',
+					width:200,
+                    name: 'plan_cn'
+                },{
+                    fieldLabel: 'Price_cn',
+					width:200,
+                    name: 'price_cn',
+					xtype: 'numberfield'
+                },new Ext.ux.form.FCKeditor({
+					name : "des_cn", 
+					width:380,
+					height:430, 
+					id : "des_cn", 
+					fieldLabel : "中文描述"
+					})
+				]
+			},{
+				id:'tab4',
+                title: '美国刊登',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Grade_US',
+					width:200,
+                    name: 'Grade_us'
+                },{
+                    fieldLabel: 'Plan_US',
+					width:200,
+                    name: 'plan_us'
+                },{
+                    fieldLabel: 'Price_US',
+					width:200,
+                    name: 'price_us',
+					xtype: 'numberfield'
+                },new Ext.ux.form.FCKeditor({
+					name : "des_en", 
+					width:380,
+					height:430, 
+					id : "des_en", 
+					fieldLabel : "英文描述"
+					})
+ 				]
+            },{
+				id:'tab5',
+                title: '澳大利亚刊登',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Grade_AU',
+					width:200,
+                    name: 'Grade_au'
+                },{
+                    fieldLabel: 'Price_AU',
+					width:200,
+                    name: 'price_au',
+					xtype: 'numberfield'
+                },{
+                    fieldLabel: 'Plan_AU',
+					width:200,
+                    name: 'plan_au'
+                }]
+            },{
+				id:'tab6',
+                title: '英国刊登',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Grade_UK',
+					width:200,
+                    name: 'Grade_uk',
+					value:this.good
+                },{
+                    fieldLabel: 'Price_UK',
+					width:200,
+                    name: 'price_uk',
+					xtype: 'numberfield'
+                },{
+                    fieldLabel: 'Plan_UK',
+					width:200,
+                    name: 'plan_uk'
+                }]
+            },{
+				id:'tab7',
+                title: '德文刊登',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Grade_DE',
+					width:200,
+                    name: 'Grade_de'
+                },{
+                    fieldLabel: 'Plan_DE',
+					width:200,
+                    name: 'plan_de'
+                },{
+                    fieldLabel: 'Price_DE',
+					width:200,
+                    name: 'price_de',
+					xtype: 'numberfield'
+                },new Ext.ux.form.FCKeditor({
+					name : "des_de", 
+					width:380,
+					height:430, 
+					id : "des_de", 
+					fieldLabel : "德文描述"
+					})
+ 				]
+			},{
+				id:'tab8',
+                title: '法文刊登',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Grade_FR',
+					width:200,
+                    name: 'Grade_fr'
+                },{
+                    fieldLabel: 'Plan_FR',
+					width:200,
+                    name: 'plan_fr'
+                },{
+                    fieldLabel: 'Price_FR',
+					width:200,
+                    name: 'price_fr',
+					xtype: 'numberfield'
+                },new Ext.ux.form.FCKeditor({
+					name : "des_fr", 
+					width:380,
+					height:430, 
+					id : "des_fr", 
+					fieldLabel : "法文描述"
+					})
+				]
+			},{
+				id:'tab9',
+                title: '西班牙文刊登',
+                layout:'form',
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Grade_SP',
+					width:200,
+                    name: 'Grade_sp'
+                },{
+                    fieldLabel: 'Plan_SP',
+					width:200,
+                    name: 'plan_sp'
+                },{
+                    fieldLabel: 'Price_SP',
+					width:200,
+                    name: 'price_sp',
+					xtype: 'numberfield'
+                },new Ext.ux.form.FCKeditor({
+					name : "des_sp", 
+					width:380,
+					height:430, 
+					id : "des_sp", 
+					fieldLabel : "西班牙文描述"
+					})
+				]
+			}
+			]
+		});		
+		return tab;
+	},
+
+	getTab:function(){
+        if (!this.tab) {
+            this.tab = this.creatTab();
+        }
+        return this.tab;
+	},
+
+	creatItems:function(){
+		this.items = [this.tab];
+	},
+
+	creatButtons:function(){
+		this.buttons = [{
+				text: '保存',
+				type: 'submit', 
+				handler:this.formsubmit.createDelegate(this)
+			},{
+					text: '取消',
+					handler:this.formreset.createDelegate(this)
+			}];		
+	},
+
+	formsubmit:function(){
+		if(this.getForm().isValid()){
+			var jsonArray = [];
+			var jsonArray1 = [];
+			if(this.getForm().getFieldValues().has_child){	
+				var n = this.childgoodsstore.modified.slice(0);
+				Ext.each(n,function(item){
+					jsonArray1.push(item.data);			
+					});
+			}
+				this.getForm().submit({
+					url:'index.php?model=goods&action=save',
+					waitMsg: '正在更新产品资料',
+					params:{'data':Ext.encode(jsonArray),'childdata':Ext.encode(jsonArray1)},
+					method:'post',
+					success:function(form,action){
+							 		if (action.result.success) {
+										Ext.example.msg('MSG','新增产品成功');
+										window.location.href = 'index.php?model=goods&action=edit&goods_id='+action.result.msg;
+									} else {
+										Ext.Msg.alert('新增产品失败',action.result.msg);
+							 		}
+							 },
+					failure:function(form,action){
+									Ext.Msg.alert('新增产品失败',action.result.msg);
+					}
+				});
+		}else{
+			Ext.example.msg('ERROR','请正确完成表单内容');
+			}
+	},
+
+	formreset:function(){//表单重置
+		this.form.reset();
+	},
+
+	removeChildItem:function(){//移除子物品
+		var data = this.ChildgoodsGrid.getSelectionModel().getSelected().data;
+		var index = this.Childgoodsstore.findBy(function(record,id){
+				return record.get('child_sn') == data.child_sn;									
+													});
+		thiz.remove(this.Childgoodsstore.getAt(index));
+	},
+	addChilditem: function() {
+		var Item = Ext.data.Record.create([{
+			name:'child_sn',
+			type:'string'
+		}, {
+			name : 'color',
+			type:'int'
+		},{
+			name : 'size',
+			type:'int'
+		}, {
+			name : 'price',
+			type:'float'
+		}, {
+			name : 'stock',
+			type : 'float'
+		}]);
+		var p = new Item({child_sn:'',size:'0',color:'0',price:0,stock:0});
+		this.childgoodsstore.insert(0, p);
+		this.childgoodsGrid.startEditing(0, 0); // 光标停留在第几行几列
+	}
+});

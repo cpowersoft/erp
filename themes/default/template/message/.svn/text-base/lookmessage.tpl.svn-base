@@ -1,0 +1,15 @@
+<!--{include file="header.tpl"}-->
+<script type="text/javascript">
+Ext.onReady(function(){
+	var container = new Ext.Panel({
+	width:800,
+	height:580,
+	autoScroll:true,
+	renderTo:document.body,
+	style:'padding:10px',
+	html:''
+	});
+	container.load({url: 'index.php?model=message&action=gethistory',params:{SenderID:"<!--{$info_SenderID}-->",itemid:"<!--{$info_itemid}-->",id:<!--{$info_id}-->},text: 'Loading...',timeout: 180});
+	loadend();
+});</script>
+<!--{include file="footer.tpl"}-->
